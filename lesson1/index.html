@@ -85,8 +85,23 @@
 
 * Without randomness, all operations would be predictable, and therefore insecure
 * Cryptography, and therefore blockchains, could not exist
+* Needed for generating secret keys, encryption protocols, and much more
 
 </script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Computing random numbers
+
+"Any one who considers arithmetical methods of producing random digits is, of course, in a state of sin. For, as has been pointed out several times, there is no such thing as a random number — there are only methods to produce random numbers, and a strict arithmetic procedure of course is not such a method."
+
+—John von Neumann
+
+</script></section>
+
 
 
 
@@ -99,18 +114,6 @@
 * Network packet arrival times
 * Wiggling mouse/pounding on keyboard (?)
  
-</script></section>
-
-
-
-<section data-markdown><script type="text/template">
-
-## Programs that make random numbers
-
-"Any one who considers arithmetical methods of producing random digits is, of course, in a state of sin. For, as has been pointed out several times, there is no such thing as a random number — there are only methods to produce random numbers, and a strict arithmetic procedure of course is not such a method."
-
-—John von Neumann
-
 </script></section>
 
 
@@ -132,7 +135,7 @@
 
 <section data-markdown><script type="text/template">
 
-## Mistake 1: Using non-PRNGs
+## Mistake 1: Using bad RNGs
 
 Linear Congruential Generator (LCG)
 
@@ -148,6 +151,7 @@ Linear Congruential Generator (LCG)
 
 * If your seed is only 32 bits bytes you will only have <pre>2<sup>32</sup> = ~4 billion</pre> different possible CSPRNG streams
 * Breakable in a few seconds
+* Use at least 128 bits of randomness for your seeds
 
 </script></section>
 
@@ -168,16 +172,97 @@ Linear Congruential Generator (LCG)
 
 
 
-
 <section data-markdown><script type="text/template">
 
-## Demos, Questions, Coffee-break
+## Moral of the story
 
-* `dice.html`
-* `randviz.html`
+* For crypto, always use a secure random number generator provided by your environment or OS
+  * In the browser use `window.crypto.getRandomValues()`
+  * On Linux/OS X use `/dev/urandom`
+  * On Windows use `RtlGenRandom`
 
 </script></section>
 
+
+
+<section data-markdown><script type="text/template">
+
+### Demos, Questions, 15 min break
+
+* [dice.html](dice.html)
+* [randviz.html](randviz.html)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Principle: Computational Infeasability
+
+* Important cryptographic assumption
+* If attackers try every possible random value, they can crack our crypto-system
+* So, we make sure there are so many possible random values that it would take "forever" for them to do so
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Hash functions
+
+* The core building block of blockchain technology
+* Functions that take an unlimited-size input and return a fixed size output:
+
+$h = H(m)$
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Preimage-resistance
+
+* Easy one-way, hard the other
+* Given an arbitrary $h$, it should be hard to find an $m$ such that $H(m) = h$
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Second preimage-resistance
+ 
+* Hard to find another message that hashes the same as your message
+* Given $m$, it should be hard to find a distinct $m'$ such that $H(m) = H(m')$
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Collision-resistance
+
+* Hard to find any two messages that hashes the same
+* Hard to find distinct $m$ and $m'$ such that $H(m) = H(m')$
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Pigeon-hole Principle
+
+<img src="pigeonhole.svg" />
+
+</script></section>
 
 
 
