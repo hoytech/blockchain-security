@@ -1,0 +1,18 @@
+blockchain crypto primitives
+  * randomness
+    * bias
+    * predictability
+  * computational infeasability
+  * hash functions
+    * pigeon-hole principle
+    * preimage vs. collision resistance
+    * fuzzy hashes
+    * birthday attacks
+    * length extension attacks
+    * rho method
+  * signatures
+    * elliptic curves
+    * HID wallets
+      * how they are basically CSPRNGs
+
+Take home problem: Generate an ethereum address that starts with 0x1234

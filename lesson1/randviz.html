@@ -1,0 +1,50 @@
+<canvas id="canv" width="800" height="800" style="border: 1px solid black"></canvas>
+
+<script>
+
+var dim = 800;
+var canvas = document.getElementById("canv");
+var ctx = canvas.getContext("2d");
+
+
+
+var lcrng_state = 100;
+
+function lcrng() {
+    lcrng_state = ((lcrng_state * 1664525) + 1013904223) % 4294967296;
+    return (lcrng_state >> 6) & 0xFFFF;
+}
+
+function do_100k(f) {
+    var start = +new Date();
+
+    for(var i=0; i<100000; i++) {
+        var x = f() % dim;
+        var y = f() % dim;
+        ctx.fillRect(x, y, 1, 1);
+    }
+
+    var end = +new Date();
+
+    document.getElementById("report").innerHTML = "Took " + (end - start) + " milliseconds";
+}
+
+
+function gen_crypto() {
+    var array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    return array[0];
+}
+
+</script>
+
+
+<br/>
+
+<button onclick="do_100k(lcrng)">LCG</button>
+<button onclick="do_100k(() => Math.floor(Math.random() * 1024))">mod bias</button>
+<button onclick="do_100k(() => Math.floor(Math.random() * dim))">Math.random</button>
+<button onclick="do_100k(gen_crypto)">window.crypto</button>
+<button onclick="ctx.clearRect(0, 0, canvas.width, canvas.height)">Clear</button>
+
+<div id="report"></div>
