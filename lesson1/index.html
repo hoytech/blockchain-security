@@ -83,11 +83,101 @@
 
 ## Randomness
 
-* Randomness
-* Hash functions
-* Digital signatures
+* Without randomness, all operations would be predictable, and therefore insecure
+* Cryptography, and therefore blockchains, could not exist
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## True random processes
+
+* Thermal noise
+* Radioactive decay
+* Network packet arrival times
+* Wiggling mouse/pounding on keyboard (?)
  
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Programs that make random numbers
+
+"Any one who considers arithmetical methods of producing random digits is, of course, in a state of sin. For, as has been pointed out several times, there is no such thing as a random number — there are only methods to produce random numbers, and a strict arithmetic procedure of course is not such a method."
+
+—John von Neumann
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Pseudo-randomness
+
+* PRNG (Pseudo-Random Number Generator)
+  * Deterministic process that generates numbers
+* CSPRNG (Cryptographically Secure PRNG)
+  * Must be unpredictable and unbiased
+  * "Stretches" the randomness from a "seed" (small value from a true RNG)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Mistake 1: Using non-PRNGs
+
+Linear Congruential Generator (LCG)
+
+<img src="chainsaw.gif" />
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Mistake 2: Too small seeds
+
+* If your seed is only 32 bits bytes you will only have <pre>2<sup>32</sup> = ~4 billion</pre> different possible CSPRNG streams
+* Breakable in a few seconds
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Mistake 3: Mod bias
+
+    function rollD6() {
+        return 1 + (getRandom() % 6);
+    }
+
+* Depending on the output range of `getRandom()`, `rollD6()` will be biased
+* Why?
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Demos, Questions, Coffee-break
+
+* `dice.html`
+* `randviz.html`
+
+</script></section>
+
 
 
 

@@ -1,0 +1,54 @@
+<style>
+.bar {
+  background-color: blue;
+  height: 20px;
+}
+</style>
+
+<div> # of 1s: <span id="count1"></span><div id="bar1" class="bar"></div></div>
+<div> # of 2s: <span id="count2"></span><div id="bar2" class="bar"></div></div>
+<div> # of 3s: <span id="count3"></span><div id="bar3" class="bar"></div></div>
+<div> # of 4s: <span id="count4"></span><div id="bar4" class="bar"></div></div>
+<div> # of 5s: <span id="count5"></span><div id="bar5" class="bar"></div></div>
+<div> # of 6s: <span id="count6"></span><div id="bar6" class="bar"></div></div>
+
+<script>
+
+function getRandom() {
+    return Math.floor(Math.random() * 16);
+}
+
+function rollD6() {
+    return 1 + (getRandom() % 6);
+}
+
+var counts = [null, 0, 0, 0, 0, 0, 0];
+
+function updateDom() {
+    var maxCount = counts.reduce((a,b) => Math.max(a,b));
+
+    for (var i=1; i<=6; i++) {
+        document.getElementById("count" + i).innerHTML = counts[i];
+        document.getElementById("bar" + i).style.width = counts[i] === 0 ? "0px" : (200 * counts[i] / maxCount) + "px";
+    }
+}
+
+updateDom();
+
+function roll(n) {
+    for (var i=0; i<n; i++) {
+        counts[rollD6()]++;
+    }
+
+    updateDom();
+}
+
+</script>
+
+<div style="margin-top: 30px">
+<button onclick="roll(1)">Roll 1x</button>
+<button onclick="roll(10)">Roll 10x</button>
+<button onclick="roll(100)">Roll 100x</button>
+<button onclick="roll(1000)">Roll 1000x</button>
+<button onclick="roll(10000)">Roll 10000x</button>
+</div>
