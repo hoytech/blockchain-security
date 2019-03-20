@@ -198,7 +198,7 @@ Linear Congruential Generator (LCG)
 
 <section data-markdown><script type="text/template">
 
-## Questions, 15 min break
+## 15 minute break
 
 </script></section>
 
@@ -353,7 +353,7 @@ $h = H(m)$
 * With older hash functions, given a hash you can add data to the end of an unknown preimage and compute a valid hash for it:
   * MD5, SHA1, SHA256
 * Doesn't have this problem:
-  * SHA3, BLAKE2, SHA512/256, double SHA256 (see bitcoin)
+  * SHA3, Keccak, BLAKE2, SHA512/256, double SHA256 (see bitcoin)
 
 </script></section>
 
@@ -361,7 +361,7 @@ $h = H(m)$
 
 <section data-markdown><script type="text/template">
 
-## Questions, 15 min break
+## 15 minute break
 
 </script></section>
 
@@ -386,7 +386,7 @@ Digital signatures let you create messages such as
 ## Public and private keys
  
 * Use a true RNG to create a private key
-  * Keep your private key secret!
+  * Always keep your private key secret!
 * Each private key has a corresponding public key
   * Your public key is your bitcoin/ethereum address
 
@@ -427,6 +427,96 @@ Unfortunately this only works for a single message
 On blockchains, almost always **elliptic curves**
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## secp256k
+
+* This is the type of elliptic curve signature used by Bitcoin, Ethereum, others
+* Private keys are 32 bytes
+* Public keys are 64 bytes (more later)
+* Signatures are 64 bytes
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## secp256k private keys
+
+* Randomly choose a 256-bit number
+* Almost any number will work, except:
+  * `0`
+  * Numbers greater than <span style="font-size: 50%">`0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140`</span>
+* If you pick a 256 bit number at random, chance it is a valid private key: <span style="font-size: 50%">`99.999999999999999999999999999999999999626%`</span>
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## [Sidebar] Keccak/SHA3
+
+* There are 2 separate hash functions: 
+  * keccak256
+  * SHA3 (standardised)
+* Confusingly, Ethereum sometimes calls keccak256 "SHA3", but they *always* mean keccak256
+* Be careful when using libraries in various languages!
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Public keys and addresses
+
+* secp256k public keys are 64 bytes
+* Ethereum addresses are 20 bytes
+* To compute an ethereum address from a public key:
+  * Hash public key with keccak256 (giving 32 bytes)
+  * Take least significant 20 bytes
+  * Encode as hexadecimal
+  * Prefix '0x'
+  * Optional: Compute checksum
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Why hash public keys?
+
+* Smaller (20 bytes instead of 64)
+* Quantum computer resistance (sort of)
+* Can be recovered from signatures anyway (next lesson)
+* There is at least one ethereum address with multiple valid private keys
+  * Why?
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Assignment: Vanity Address
+
+* Find a pivate key with a corresponding Ethereum address that starts with `0x1234`
+* Make sure you generate your private key safely!
+* HINT: Use [ethereumjs-util](https://www.npmjs.com/package/ethereumjs-util) JavaScript package
+* Extra credit:
+  * Make sure your random number is actually a valid private key
+  * Don't use `privateToAddress` method
+
+</script></section>
+
 
 
 
