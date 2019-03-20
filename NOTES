@@ -12,7 +12,9 @@ blockchain crypto primitives
     * rho method
   * signatures
     * elliptic curves
+    * how are ethereum addresses generated
     * HID wallets
       * how they are basically CSPRNGs
+    * ecrecover
 
 Take home problem: Generate an ethereum address that starts with 0x1234
