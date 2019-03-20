@@ -238,7 +238,7 @@ $h = H(m)$
 
 ## Preimage-resistance
 
-* Hash functions are "one-way"
+* Hashing is a "one-way" function
 * If you only know the hash of a secret, it's hard to find that secret
 * Formally: given an arbitrary $h$, it is computationally infeasible to find an $m$ such that $H(m) = h$
 
@@ -262,8 +262,10 @@ $h = H(m)$
 
 ## Mistake 1: Small preimage domain
 
+* Be careful when anonymizing names/IPs/emails by hashing
 * If there aren't that many possible secrets, you can just try all of them
-* [preimage.html](preimage.html)
+* Exercise: [preimage.html](preimage.html)
+* So much for "one-way" function
  
 </script></section>
 
@@ -283,11 +285,86 @@ $h = H(m)$
 
 <section data-markdown><script type="text/template">
 
-## Pigeon-hole Principle
+## Pigeon-hole principle
 
 <img src="pigeonhole.svg" />
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Collision attacks
+
+* Hash functions are almost always attacked by finding collisions, not specific preimages
+* MD5 and SHA1 are insecure because it is easier than it should be to find collisions
+  * Both are still practically secure against preimage attacks though
+* Why is it easier to find collisions?
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Birthday experiment
+
+* Doesn't always work, but it's fun when it does
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Rho method (tortoise and hare)
+
+* Memory-efficient way to search for collisions
+* Named because it looks like greek letter <b><i>ρ</i></b>
+
+<img src="rho.svg" style="background-color: white;" />
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Mistake 2: Equivalent inputs
+
+    function hashUserInfo(username, userId) {
+        return sha1(username + userId);
+    }
+
+`hashUserInfo("john", 234)`
+
+`hashUserInfo("john2", 34)`
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Mistake 3: Length extension
+
+* With older hash functions, given a hash you can add data to the end of an unknown preimage and compute a valid hash for it:
+  * MD5, SHA1, SHA256
+* Doesn't have this problem:
+  * SHA3, BLAKE2, SHA512/256, double SHA256 (see bitcoin)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Questions, 15 min break
+
+</script></section>
+
 
 
 
