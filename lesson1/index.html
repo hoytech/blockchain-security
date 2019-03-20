@@ -172,27 +172,38 @@ Linear Congruential Generator (LCG)
 
 
 
-<section data-markdown><script type="text/template">
-
-## Moral of the story
-
-* For crypto, always use a secure random number generator provided by your environment or OS
-  * In the browser use `window.crypto.getRandomValues()`
-  * On Linux/OS X use `/dev/urandom`
-  * On Windows use `RtlGenRandom`
-
-</script></section>
-
-
 
 <section data-markdown><script type="text/template">
 
-### Demos, Questions, 15 min break
+## Demos
 
 * [dice.html](dice.html)
 * [randviz.html](randviz.html)
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Moral of the story
+
+* For crypto, always use a secure random number generator provided by your environment or OS
+  * Web-browser: `window.crypto.getRandomValues()`
+  * Linux/OS X: `/dev/urandom`
+  * Windows: `RtlGenRandom`
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Questions, 15 min break
+
+</script></section>
+
+
+
 
 
 
@@ -227,13 +238,14 @@ $h = H(m)$
 
 ## Preimage-resistance
 
-* Easy one-way, hard the other
-* Given an arbitrary $h$, it should be hard to find an $m$ such that $H(m) = h$
+* Hash functions are "one-way"
+* If you only know the hash of a secret, it's hard to find that secret
+* Formally: given an arbitrary $h$, it is computationally infeasible to find an $m$ such that $H(m) = h$
 
 </script></section>
 
 
-
+<!--
 <section data-markdown><script type="text/template">
 
 ## Second preimage-resistance
@@ -242,6 +254,18 @@ $h = H(m)$
 * Given $m$, it should be hard to find a distinct $m'$ such that $H(m) = H(m')$
 
 </script></section>
+-->
+
+
+
+<section data-markdown><script type="text/template">
+
+## Mistake 1: Small preimage domain
+
+* If there aren't that many possible secrets, you can just try all of them
+* [preimage.html](preimage.html)
+ 
+</script></section>
 
 
 
@@ -249,8 +273,9 @@ $h = H(m)$
 
 ## Collision-resistance
 
-* Hard to find any two messages that hashes the same
-* Hard to find distinct $m$ and $m'$ such that $H(m) = H(m')$
+* Hard to find any two messages that hash to the same value
+* Formally: Computationally infeasible to find distinct $m$ and $m'$ such that $H(m) = H(m')$
+* All hash functions have collisions because...
 
 </script></section>
 
