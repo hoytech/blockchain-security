@@ -84,8 +84,8 @@
 ## Randomness
 
 * Without randomness, all operations would be predictable, and therefore insecure
-* Cryptography, and therefore blockchains, could not exist
-* Needed for generating secret keys, encryption protocols, and much more
+* Cryptography (and blockchains) could not exist
+* Needed for generating secret keys, operating encryption protocols, and more
 
 </script></section>
 
@@ -149,8 +149,8 @@ Linear Congruential Generator (LCG)
 
 ## Mistake 2: Too small seeds
 
-* If your seed is only 32 bits bytes you will only have <pre>2<sup>32</sup> = ~4 billion</pre> different possible CSPRNG streams
-* Breakable in a few seconds
+* If your seed is 32 bits you will only have <pre>2<sup>32</sup> = ~4 billion</pre> different possible sequences
+* Easily breakable , even if PRNG is strong
 * Use at least 128 bits of randomness for your seeds
 
 </script></section>
@@ -212,7 +212,7 @@ Linear Congruential Generator (LCG)
 ## Principle: Computational Infeasability
 
 * Important cryptographic assumption
-* If attackers try every possible random value, they can crack our crypto-system
+* If attackers could try every possible random value, they could crack our crypto-system
 * So, we make sure there are so many possible random values that it would take "forever" for them to do so
 
 </script></section>
@@ -224,7 +224,7 @@ Linear Congruential Generator (LCG)
 
 ## Hash functions
 
-* The core building block of blockchain technology
+* The core building block of blockchains
 * Functions that take an unlimited-size input and return a fixed size output:
 
 $h = H(m)$
@@ -262,7 +262,7 @@ $h = H(m)$
 
 ## Mistake 1: Small preimage domain
 
-* Be careful when anonymizing names/IPs/emails by hashing
+* Be careful when anonymizing names/IPs/emails/etc by hashing
 * If there aren't that many possible secrets, you can just try all of them
 * Exercise: [preimage.html](preimage.html)
 * So much for "one-way" function
@@ -299,7 +299,7 @@ $h = H(m)$
 
 * Hash functions are almost always attacked by finding collisions, not specific preimages
 * MD5 and SHA1 are insecure because it is easier than it should be to find collisions
-  * Both are still practically secure against preimage attacks though
+  * Both are still practically secure against preimage attacks
 * Why is it easier to find collisions?
 
 </script></section>
@@ -351,9 +351,9 @@ $h = H(m)$
 ## Mistake 3: Length extension
 
 * With older hash functions, given a hash you can add data to the end of an unknown preimage and compute a valid hash for it:
-  * MD5, SHA1, SHA256
+  * MD5, SHA1, SHA2-256
 * Doesn't have this problem:
-  * SHA3, Keccak, BLAKE2, SHA512/256, double SHA256 (see bitcoin)
+  * SHA3, Keccak, BLAKE2, SHA2-512/256, double SHA2-256 (see bitcoin)
 
 </script></section>
 
@@ -364,6 +364,21 @@ $h = H(m)$
 ## 15 minute break
 
 </script></section>
+
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Kerckhoffs's principle
+
+* Everything about how a cryptosystem works should be open and public information, **except for each user's secret key(s)**
+* The opposite is *security through obscurity*, which is bad because it doesn't work
+
+</script></section>
+
 
 
 
@@ -378,6 +393,8 @@ Digital signatures let you create messages such as
 ... and prove that this message was created by Alice, and not some attacker
 
 </script></section>
+
+
 
 
 
@@ -466,8 +483,8 @@ On blockchains, almost always **elliptic curves**
 * There are 2 separate hash functions: 
   * keccak256
   * SHA3 (standardised)
-* Confusingly, Ethereum sometimes calls keccak256 "SHA3", but they *always* mean keccak256
-* Be careful when using libraries in various languages!
+* Confusingly, Ethereum folks sometimes say "SHA3", but they *always* mean keccak256
+  * So be careful when using libraries in various languages!
 
 </script></section>
 
@@ -497,7 +514,7 @@ On blockchains, almost always **elliptic curves**
 
 * Smaller (20 bytes instead of 64)
 * Quantum computer resistance (sort of)
-* Can be recovered from signatures anyway (next lesson)
+* Can be recovered from signatures anyway (later lesson)
 * There is at least one ethereum address with multiple valid private keys
   * Why?
 
@@ -508,12 +525,13 @@ On blockchains, almost always **elliptic curves**
 
 ## Assignment: Vanity Address
 
-* Find a pivate key with a corresponding Ethereum address that starts with `0x1234`
+* Find a private key with a corresponding Ethereum address that starts with `0x1234`
 * Make sure you generate your private key safely!
 * HINT: Use [ethereumjs-util](https://www.npmjs.com/package/ethereumjs-util) JavaScript package
-* Extra credit:
-  * Make sure your random number is actually a valid private key
+* For extra credit:
   * Don't use `privateToAddress` method
+  * Make sure your random number is actually a valid private key
+  * What is the probability one of your classmates gets the same address as you?
 
 </script></section>
 

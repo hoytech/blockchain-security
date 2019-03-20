@@ -15,6 +15,68 @@ blockchain crypto primitives
     * how are ethereum addresses generated
     * HID wallets
       * how they are basically CSPRNGs
-    * ecrecover
 
-Take home problem: Generate an ethereum address that starts with 0x1234
+  * assignment: Take home problem: Generate an ethereum address that starts with 0x1234
+
+
+
+
+blockchain architecture
+  * role of miners
+  * account-based versus UTXO
+  * consensus
+    * complete determinism
+  * gas
+  * storage
+    * merkle trees
+  * transactions
+    * structure of transactions
+    * errors
+  * ecrecover
+  * EVM
+  * smart contracts
+  * solidity
+  * solidity ABI
+  * function selectors
+  * revert/assert/require
+  * ganache
+
+
+
+smart contract security
+  * attack model
+    * third-party
+    * underhanded
+  * upgradability
+  * can we detect if a user is a smart contract?
+    * https://consensys.github.io/smart-contract-best-practices/recommendations/#avoid-using-extcodesize-to-check-for-externally-owned-accounts
+  * on-chain data is public
+
+
+
+on-chain randomness
+
+
+
+Resource: https://consensys.github.io/smart-contract-best-practices/known_attacks/
+
+
+attacks
+  * integer over/under flows
+  * reentrancy
+    * the DAO
+  * DoS with unexpected revert in attacker's fallback function
+  * DoS with block gas limit
+  * unexpectedly sending ether to a contract
+
+
+* ERC-20 approval bug
+
+
+protocol level
+  * front-running
+  * timestamp
+
+
+
+https://consensys.github.io/smart-contract-best-practices/security_tools/
