@@ -1,0 +1,31 @@
+<style>
+body {
+  font-size: 125%;
+}
+
+div {
+  margin-bottom: 20px;
+}
+</style>
+
+<div>
+  When you started ganache-cli, it printed out a list of addresses that were given a default balance.
+</div>
+
+<div>
+  Query ganache-cli's JSON-RPC port to find the balance of one of these addresses.
+</div>
+
+<div>
+  An easy way is to use the <a href="https://curl.haxx.se/">curl</a> command:
+</div>
+
+<div>
+<pre>
+$ curl http://localhost:8545 -d '{"method":"eth_getBalance","params":["ADDRESS_GOES_HERE"]}'
+</pre>
+</div>
+
+<div>
+The output is in wei (there are 1e18 wei in 1 ETH), and is encoded in hexadecimal. Convert this to ETH and decimal.
+</div>
