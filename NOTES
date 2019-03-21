@@ -26,11 +26,15 @@ blockchain architecture
   * account-based versus UTXO
   * consensus
     * complete determinism
+  * nonces
+    * replay attacks
+    * enforces ordering
   * gas
   * storage
     * merkle trees
   * transactions
     * structure of transactions
+      * https://programtheblockchain.com/posts/2017/12/29/how-ethereum-transactions-work/
     * errors
   * ecrecover
   * EVM
@@ -63,9 +67,13 @@ Resource: https://consensys.github.io/smart-contract-best-practices/known_attack
 
 attacks
   * integer over/under flows
+    * twos complement
+      * small negative numbers use a lot of gas
+    * abs(most_negative_number)
   * reentrancy
     * the DAO
   * DoS with unexpected revert in attacker's fallback function
+    * withdraw pattern
   * DoS with block gas limit
   * unexpectedly sending ether to a contract
 
@@ -78,5 +86,24 @@ protocol level
   * timestamp
 
 
+Checks-Effects-Interactions pattern
+  * https://solidity.readthedocs.io/en/v0.4.21/security-considerations.html#use-the-checks-effects-interactions-pattern
+
+
+replay attacks
+  * something like: https://programtheblockchain.com/posts/2018/07/11/writing-a-trivial-multisig-wallet/
+  * ^^ remove the nonce
+
 
 https://consensys.github.io/smart-contract-best-practices/security_tools/
+
+
+
+
+https://programtheblockchain.com/posts/
+
+
+
+
+assembly
+  * reserved area: mstore(0x40, 0x60) at the very top reserves the first 64 bytes in memory for sha3 hashing. This is always there whether the contract needs it or not.

@@ -499,7 +499,7 @@ On blockchains, almost always **elliptic curves**
 * Ethereum addresses are 20 bytes
 * To compute an ethereum address from a public key:
   * Hash public key with keccak256 (giving 32 bytes)
-  * Take least significant 20 bytes
+  * Take *last* 20 bytes of hash
   * Encode as hexadecimal
   * Prefix '0x'
   * Optional: Compute checksum
