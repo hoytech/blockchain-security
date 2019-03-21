@@ -44,6 +44,11 @@
       .two-column em {
         margin: 20px;
       }
+
+      .reveal .big-and-bold {
+        font-weight: bold;
+        font-size: 125%;
+      }
     </style>
   </head>
 
@@ -68,16 +73,184 @@
 
 <section data-markdown><script type="text/template">
 
-## Types of accounts
+## Distributed data-base
+
+* A blockchain is a distributed data-base (DB)
+* Everyone agrees on a basic set of rules about how it can be changed
+  * Example: only the owner of an account can send transactions from it
+* When it is working properly, everyone in the world has an exact copy of the DB
+  * *consensus*
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Deterministic effects
+
+* When applying a transaction to the DB, everyone in the world must get the same resulting DB
+* So: all transactions must be **deterministic**
+  * Cannot get input from outside world
+  * Cannot generate random numbers
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+<img src="determinism.svg" style="background-color: white" />
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## UTXO versus Accounts
+
+* Bitcoin uses *Unspent Transaction Outputs*
+  * Your balance doesn't exist in one place, it's the sum of all unspent "cheques" you've received
+* Ethereum uses *Accounts*
+  * Your balance exists in one location in the DB
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Replay attacks
+
+* Imagine Alice signs and sends a transaction:
+  * *I, Alice, send 10 coins to Bob*
+* Bob waits a while and then copies the **exact same transaction** and sends it again:
+  * *I, Alice, send 10 coins to Bob*
+* Without "replay protection" Bob would now have 20 coins
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Replay attack prevention
+
+* In UTXO model, a transaction "spends" a UTXO, invalidating it so it cannot be spent again
+* In Account model, each account has a counter and each transaction has a transaction number
+  * To mine a transaction, its transaction number must be next the account counter number
+  * After applying the transaction, the account counter is incremented
+
+</script></section>
+
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Ethereum Transaction Structure
+
+| Field        | Explanation  |
+| ------------- | -----:|
+| nonce      | Transaction number |
+| to | Address being sent to |
+| value | Amount of ETH sent to `to` |
+| init / data | For smart contracts |
+| gasPrice, gasLimit | Resource limits |
+| v, r, s | Signature |
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Nonce
+
+* A nonce is a <span class="big-and-bold">N</span>umber you can only use <span class="big-and-bold">ONCE</span>
+* Ethereum sometimes calls the account counter and/or the transaction number a *nonce*
+* Sort of a misnomer in Ethereum:
+  * Not harmful to re-use a nonce, because only one transaction will make it onto the chain
+  * This is only way to cancel a pending transaction
+* Also guarantees transaction sequencing
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Resource Limits
+
+* In order to prevent a transaction from consuming excess resources, transactions are required to pay fees proportional to how much they consume
+  * In Bitcoin the fee is based on how big the transaction is
+  * In Ethereum the accounting is more complicated: **gas**
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Gas
+
+* As well as its size, every operation performed by a transaction takes a certain amount of gas
+* The transaction must pay the sum of all gas it used times the `gasPrice` it proposed to pay
+* If the transaction uses more than its `gasLimit` then all its effects are reverted (but the fee is still payed!)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Gas Intuition
+
+| Term        | Intuition  |
+| ------------- | -----|
+| gas&nbsp;used | How many units of gas your car burns each time your drive to the store |
+| gas&nbsp;limit | How many units of gas you buy before driving to the store. If it's not enough you won't get to the store (but you'll still spend the gas) |
+| gas&nbsp;price | How much each unit of gas cost when you filled your tank |
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## No from field?
+
+* The transaction contains the ethereum address being sent *to*
+* Why doesn't it contain the address the transaction is being *from*?
+  * Because it can be recovered from the signature (more later)
+
+</script></section>
+
+
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Types of Ethereum accounts
 
 * Externally Owned Accounts (EOA)
-  * Has public/private key-pair
-  * Does not have code
+  * Normal public/private key-pair accounts like we created last lesson
 * Contracts
-  * Does not have a key-pair
-  * Has code
-
-Both 
+  * Does not have a key-pair at all
+  * Has "code" written by the contract creator
+  * Can only respond to external events
 
 </script></section>
 

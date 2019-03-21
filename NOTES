@@ -22,7 +22,6 @@ blockchain crypto primitives
 
 
 blockchain architecture
-  * role of miners
   * account-based versus UTXO
   * consensus
     * complete determinism
@@ -45,6 +44,13 @@ blockchain architecture
   * revert/assert/require
   * ganache
 
+
+* transaction costs
+  * 0 bytes are cheaper
+
+
+
+  ? role of miners
 
 
 smart contract security
