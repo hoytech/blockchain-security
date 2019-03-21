@@ -1,0 +1,32 @@
+<style>
+body {
+  font-size: 125%;
+}
+</style>
+
+
+<h1>Some example Ethereum transactions</h1>
+
+
+For each of the following transactions, determine:
+
+<ul>
+  <li>The sender ("to")</li>
+  <li>The recipient ("from")</li>
+  <li>The gas price the transaction offered (in Gwei)</li>
+  <li>How much gas was used (in units of gas)</li>
+  <li>How much the sender actually paid as a "transaction fee" (in ETH and/or $)</li>
+  <li>Did it use all gas up to the gas limit?</li>
+  <li>Did the transaction succeed?</li>
+  <li>Was the recipient an EOA or a smart contract?</li>
+  <li>Was there any input data?</li>
+</ul>
+
+
+<ol>
+  <li><a href="https://etherscan.io/tx/0xc569558715e9e7e12ff9a07b07269693ce1cedd0f4e20c68c69dd3b6f61e95cb">Simple transfer</a></li>
+  <li><a href="https://etherscan.io/tx/0x18bf783fa0ebd7b04ba53f7caf71c5747dcd17933c3abe48bf76540f59d7a582">Out of gas</a></li>
+  <li><a href="https://etherscan.io/tx/0xbd052407c5d985911ec46c9d3fa651b0bf6efdf7b9c86d13bf61270b24bc5031">Exception thrown (old way: uses up all gas)</a></li>
+  <li><a href="https://etherscan.io/tx/0x3f56b4c15dbeadcb2965c71c47894a1413c11f991786123318a8fcaaac19839a">Exception thrown (new way: revert)</a></li>
+  <li><a href="https://etherscan.io/tx/0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f">Contract creation</a></li>
+</ol>

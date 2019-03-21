@@ -87,26 +87,28 @@ attacks
 * ERC-20 approval bug
 
 
-protocol level
-  * front-running
-  * timestamp
 
 
 Checks-Effects-Interactions pattern
   * https://solidity.readthedocs.io/en/v0.4.21/security-considerations.html#use-the-checks-effects-interactions-pattern
 
 
-replay attacks
-  * something like: https://programtheblockchain.com/posts/2018/07/11/writing-a-trivial-multisig-wallet/
-  * ^^ remove the nonce
 
 
 https://consensys.github.io/smart-contract-best-practices/security_tools/
 
 
 
+consensus level security
+  * double spends
+  * front-running
+  * timestamp manipulation
 
-https://programtheblockchain.com/posts/
+
+
+some good examples for exercises: https://programtheblockchain.com/posts/
+  * something like: https://programtheblockchain.com/posts/2018/07/11/writing-a-trivial-multisig-wallet/
+  * remove the nonce for a replay attack
 
 
 

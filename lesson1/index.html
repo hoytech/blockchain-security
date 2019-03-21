@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
 
-    <title>Blockchain Security</title>
+    <title>Introduction to Blockchain Security Practices</title>
 
     <meta name="author" content="Doug Hoyte">
 
@@ -57,9 +57,11 @@
 
 <section data-markdown><script type="text/template">
 
-# Blockchain Security
+## Introduction to Blockchain Security Practices
 
 ### Lesson 1: Cryptographic Primitives
+
+*Doug Hoyte, March 2019*
 
 </script></section>
 
@@ -225,7 +227,7 @@ Linear Congruential Generator (LCG)
 ## Hash functions
 
 * The core building block of blockchains
-* Functions that take an unlimited-size input and return a fixed size output:
+* Functions that take an unlimited-size input message $m$ and return a fixed size output $h$:
 
 $h = H(m)$
 
@@ -427,7 +429,7 @@ Suppose you want to sign a 1 bit message:
   * To sign the message `0`, reveal $r_0$
   * To sign the message `1`, reveal $r_1$
 
-Unfortunately this only works for a single message
+Problem: Key-pair only useful one time
 
 </script></section>
 

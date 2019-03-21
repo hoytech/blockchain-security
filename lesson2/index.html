@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
 
-    <title>Blockchain Security</title>
+    <title>Introduction to Blockchain Security Practices</title>
 
     <meta name="author" content="Doug Hoyte">
 
@@ -62,9 +62,11 @@
 
 <section data-markdown><script type="text/template">
 
-# Blockchain Security
+## Introduction to Blockchain Security Practices
 
 ### Lesson 2: Blockchain Architecture
+
+*Doug Hoyte, March 2019*
 
 </script></section>
 
@@ -152,6 +154,22 @@
 
 
 
+<section data-markdown><script type="text/template">
+
+## Types of Ethereum accounts
+
+* Externally Owned Accounts (EOA)
+  * Normal public/private key-pair accounts like we created last lesson
+* Contracts
+  * Does not have a key-pair
+  * Has "code" written by the contract creator
+  * No ability to send transactions: can only respond to external events
+
+</script></section>
+
+
+
+
 
 <section data-markdown><script type="text/template">
 
@@ -189,11 +207,25 @@
 
 <section data-markdown><script type="text/template">
 
+## Smart contracts
+
+* A transaction can create a smart contract
+  * The `init` field will contain the initialization code that sets up the smart contract
+* Or, a transaction can be a message to an existing smart contract
+  * The `data` field will contain the parameters of the message
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
 ## Resource Limits
 
-* In order to prevent a transaction from consuming excess resources, transactions are required to pay fees proportional to how much they consume
-  * In Bitcoin the fee is based on how big the transaction is
-  * In Ethereum the accounting is more complicated: **gas**
+* In order to prevent a transaction from consuming excessive resources, transactions are required to pay fees proportional to how much they consume
+  * In Bitcoin the fee is purely based transaction size
+  * In Ethereum the accounting is more complicated: it uses **gas** accounting
 
 </script></section>
 
@@ -204,8 +236,8 @@
 
 ## Gas
 
-* As well as its size, every operation performed by a transaction takes a certain amount of gas
-* The transaction must pay the sum of all gas it used times the `gasPrice` it proposed to pay
+* Every operation performed by a transaction takes a certain amount of gas
+* The transaction must pay the sum of all gas it used times the `gasPrice` it offered to pay
 * If the transaction uses more than its `gasLimit` then all its effects are reverted (but the fee is still payed!)
 
 </script></section>
@@ -220,7 +252,7 @@
 | ------------- | -----|
 | gas&nbsp;used | How many units of gas your car burns each time your drive to the store |
 | gas&nbsp;limit | How many units of gas you buy before driving to the store. If it's not enough you won't get to the store (but you'll still spend the gas) |
-| gas&nbsp;price | How much each unit of gas cost when you filled your tank |
+| gas&nbsp;price | How much each unit of gas costs when you fill your tank |
 
 </script></section>
 
@@ -237,20 +269,19 @@
 
 
 
+<section data-markdown><script type="text/template">
 
+## Exercise: Let's look at some example transactions
+
+[example-transactions.html](example-transactions.html)
+
+</script></section>
 
 
 
 <section data-markdown><script type="text/template">
 
-## Types of Ethereum accounts
-
-* Externally Owned Accounts (EOA)
-  * Normal public/private key-pair accounts like we created last lesson
-* Contracts
-  * Does not have a key-pair at all
-  * Has "code" written by the contract creator
-  * Can only respond to external events
+## 15 minute break
 
 </script></section>
 
