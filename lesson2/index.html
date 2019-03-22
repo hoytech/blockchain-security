@@ -99,12 +99,21 @@
 
 * A blockchain is a distributed data-base (DB)
 * Everyone agrees on a basic set of rules about how it can be changed
-  * Example: only the owner of an account can send transactions from the account
+  * Example rule: only the owner of an account can send transactions from that account
 * When a blockchain is working properly, everyone in the world has the exact same copy of the DB
   * How this happens is called a *consensus protocol*
 
 </script></section>
 
+
+
+<section data-markdown><script type="text/template">
+
+## Consensus
+
+<img src="determinism.svg" style="background-color: white" />
+
+</script></section>
 
 
 
@@ -115,19 +124,13 @@
 * When applying a transaction to the DB, everyone in the world must get the same resulting DB
 * So: all transactions must be **deterministic**
   * Cannot get input from outside world
-  * Cannot have side-effects on the outside world
   * Cannot generate random numbers
+  * Cannot depend on anything except what is already in the DB
 
 </script></section>
 
 
 
-
-<section data-markdown><script type="text/template">
-
-<img src="determinism.svg" style="background-color: white" />
-
-</script></section>
 
 
 
@@ -138,7 +141,7 @@
 * Bitcoin uses *Unspent Transaction Outputs*
   * Your balance doesn't exist in one place, it's the sum of all unspent "cheques" you've received
 * Ethereum uses *Accounts*
-  * Your balance exists in one location in the DB
+  * Your balance exists in a single record in the DB
 
 </script></section>
 
@@ -153,7 +156,7 @@
   * *I, Alice, send 10 coins to Bob*
 * Bob waits a while and then copies the **exact same transaction** and sends it again:
   * *I, Alice, send 10 coins to Bob*
-* Without "replay protection" Bob would now have 20 coins
+* Without transaction "replay prevention" Bob would now have 20 coins
 
 </script></section>
 
@@ -162,11 +165,11 @@
 
 <section data-markdown><script type="text/template">
 
-## Replay attack prevention
+## Replay prevention
 
-* In UTXO model, a transaction "spends" a UTXO, invalidating it so it cannot be spent again
-* In Account model, each account has a counter and each transaction has a transaction number
-  * To mine a transaction, its transaction number must be the next account counter number
+* UTXO model: a transaction "spends" a UTXO, invalidating it so it cannot be spent again
+* Account model: each account has a counter, and each transaction has a sequence number
+  * To apply a transaction, its sequence number must be the next account counter number
   * After applying the transaction, the account counter is incremented
 
 </script></section>
@@ -184,7 +187,7 @@
 * Contracts
   * Do not have key-pairs
   * Have "code" written by contract creators
-  * No ability to send transactions: can only respond to external events
+  * No ability to initiate transactions: can only respond to external events
 
 </script></section>
 
@@ -198,7 +201,7 @@
 
 | Field        | Explanation  |
 | ------------- |:-----:|
-| nonce      | Transaction number |
+| nonce      | Transaction sequence number |
 | to | Address being sent to |
 | value | Amount of ETH sent to `to` |
 | init / data | For smart contracts |
@@ -215,11 +218,11 @@
 ## Nonce
 
 * <span class="big-and-bold">N</span>umber you can only use <span class="big-and-bold">ONCE</span>
-* Ethereum sometimes calls the account counter and/or the transaction number a *nonce*
+* Ethereum sometimes calls the account counter and/or the transaction sequence number a *nonce*
 * Sort of a misnomer in Ethereum:
   * Not harmful to re-use a nonce, because only one transaction will make it onto the chain
   * This is only way to cancel a pending transaction
-* Also guarantees transaction sequencing
+* Ensures transactions applied in expected order
 
 </script></section>
 
@@ -245,8 +248,8 @@
 ## Resource Limits
 
 * In order to prevent a transaction from consuming excessive resources, transactions are required to pay fees proportional to how much they consume
-  * In Bitcoin the fee is purely based transaction size
-  * In Ethereum the accounting is more complicated: it uses **gas** accounting
+  * In Bitcoin the fee is based on transaction size
+  * Ethereum is more complicated: it uses **gas** accounting
 
 </script></section>
 
@@ -271,9 +274,9 @@
 
 | Term        | Intuition  |
 | ------------- | -----|
-| gas&nbsp;used | How many units of gas your car burns each time your drive to the store |
-| gas&nbsp;limit | How many units of gas you buy before driving to the store. If it's not enough you won't get to the store (but you'll still spend the gas) |
-| gas&nbsp;price | How much each unit of gas costs when you fill your tank |
+| gas&nbsp;used | How many units of gas your car needed to drive to the store |
+| gas&nbsp;limit | How many units of gas you chose to buy before driving to the store. If it wasn't enough you won't make it there |
+| gas&nbsp;price | How much each unit of gas cost at the time you purchased it |
 
 </script></section>
 
@@ -283,8 +286,8 @@
 ## No from field?
 
 * The transaction contains the ethereum address being sent *to*
-* Why doesn't it contain the address the transaction is being *from*?
-  * Because it can be recovered from the signature (more later)
+* But why doesn't it contain the address the transaction is being sent *from*?
+  * Because it can be recovered from the signature
 
 </script></section>
 
@@ -292,7 +295,7 @@
 
 <section data-markdown><script type="text/template">
 
-## Demo: Let's look at some example transactions
+## Demo: Let's look at some real transactions
 
 [example-transactions.html](example-transactions.html)
 
@@ -334,7 +337,7 @@
 * Verify that every transaction in every block follows the rules
 * Some full nodes also manage private keys and create transactions on behalf of users
   * This is now regarded as bad design
-  * Prefer separation of key management from node software
+  * Prefer separation of key management agents from node software
 
 </script></section>
 
@@ -361,7 +364,7 @@
 
 * In JSON-RPC, many inputs and outputs are hex-encoded (string with a "0x" prefix)
 * ETH values are always in Wei (there are 10<sup>18</sup> wei in 1 ETH)
-* Numeric values are in [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement)
+* Numeric values are in [big endian](https://en.wikipedia.org/wiki/Endianness), [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement)
 
 </script></section>
 
@@ -457,7 +460,7 @@ Then run:
 * End-users interact with **wallet software**:
   * Manage keys (hopefully securely)
   * Build and sign transactions on behalf of the user
-  * Communicate with nodes to upload transactions and read state of the chain
+  * Communicate with full nodes to upload transactions and read state of the chain
   * Provide an API for *dapps* to interact with the wallet
     * dapps should not have access to user's private keys!
 
@@ -493,7 +496,7 @@ Then run:
 
 * Similar to hash functions, except hash functions are designed to be fast, KDFs are designed to be slow
 * If you have a small preimage domain (like typical user passwords) then you want to make it as slow/expensive as possible to guess combinations
-* Don't use hashes for password storage. Use a good KDF like bcrypt or argon2
+  * Don't use hashes for password storage. Use a good KDF like bcrypt or argon2
 
 </script></section>
 
@@ -503,8 +506,7 @@ Then run:
 
 ## Metamask
 
-* Very popular wallet
-* A browser extension that manages private keys
+* Popular wallet implemented as a browser extension
   * Websites cannot access the private keys
 * Creates transactions
 * Download it from [https://metamask.io](https://metamask.io) 
@@ -534,6 +536,13 @@ After ganache-cli is started, change metamask to point to it (instead of the mai
 
 </script></section>
 
+
+
+<section data-markdown><script type="text/template">
+
+## End of lesson
+
+</script></section>
 
 
 <!------------------------------------------------------->

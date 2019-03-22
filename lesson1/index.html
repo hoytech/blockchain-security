@@ -87,7 +87,7 @@
 
 * Without randomness, all operations would be predictable, and therefore insecure
 * Cryptography (and blockchains) could not exist
-* Needed for generating secret keys, operating encryption protocols, and more
+* Needed for generating secret keys, encryption protocols, and more
 
 </script></section>
 
@@ -95,8 +95,6 @@
 
 
 <section data-markdown><script type="text/template">
-
-## Computing random numbers
 
 "Any one who considers arithmetical methods of producing random digits is, of course, in a state of sin. For, as has been pointed out several times, there is no such thing as a random number — there are only methods to produce random numbers, and a strict arithmetic procedure of course is not such a method."
 
@@ -137,7 +135,7 @@
 
 <section data-markdown><script type="text/template">
 
-## Mistake 1: Using bad RNGs
+## Random mistake 1: Bad RNGs
 
 Linear Congruential Generator (LCG)
 
@@ -149,7 +147,7 @@ Linear Congruential Generator (LCG)
 
 <section data-markdown><script type="text/template">
 
-## Mistake 2: Too small seeds
+## Random mistake 2: Small seeds
 
 * If your seed is 32 bits you will only have <pre>2<sup>32</sup> = ~4 billion</pre> different possible sequences
 * Easily breakable , even if PRNG is strong
@@ -161,7 +159,7 @@ Linear Congruential Generator (LCG)
 
 <section data-markdown><script type="text/template">
 
-## Mistake 3: Mod bias
+## Random mistake 3: Mod bias
 
     function rollD6() {
         return 1 + (getRandom() % 6);
@@ -213,8 +211,8 @@ Linear Congruential Generator (LCG)
 
 ## Principle: Computational Infeasability
 
-* Important cryptographic assumption
-* If attackers could try every possible random value, they could crack our crypto-system
+* Relied on by all practical cryptography
+* If attackers could try every possible random value, they could crack your crypto-system
 * So, we make sure there are so many possible random values that it would take "forever" for them to do so
 
 </script></section>
@@ -262,7 +260,7 @@ $h = H(m)$
 
 <section data-markdown><script type="text/template">
 
-## Mistake 1: Small preimage domain
+## Hashing mistake 1: Small preimage domain
 
 * Be careful when anonymizing names/IPs/emails/etc by hashing
 * If there aren't that many possible secrets, you can just try all of them
@@ -279,7 +277,7 @@ $h = H(m)$
 
 * Hard to find any two messages that hash to the same value
 * Formally: Computationally infeasible to find distinct $m$ and $m'$ such that $H(m) = H(m')$
-* All hash functions have collisions because...
+* We know *all* hash functions have collisions because...
 
 </script></section>
 
@@ -334,7 +332,7 @@ $h = H(m)$
 
 <section data-markdown><script type="text/template">
 
-## Mistake 2: Equivalent inputs
+## Hashing mistake 2: Equivalent inputs
 
     function hashUserInfo(username, userId) {
         return sha1(username + userId);
@@ -350,7 +348,7 @@ $h = H(m)$
 
 <section data-markdown><script type="text/template">
 
-## Mistake 3: Length extension
+## Hashing mistake 3: Length extension
 
 * With older hash functions, given a hash you can add data to the end of an unknown preimage and compute a valid hash for it:
   * MD5, SHA1, SHA2-256
@@ -503,7 +501,7 @@ On blockchains, almost always **elliptic curves**
   * Hash public key with keccak256 (giving 32 bytes)
   * Take *last* 20 bytes of hash
   * Encode as hexadecimal
-  * Prefix '0x'
+  * Prefix with "0x"
   * Optional: Compute checksum
 
 </script></section>
@@ -517,7 +515,7 @@ On blockchains, almost always **elliptic curves**
 * Smaller (20 bytes instead of 64)
 * Quantum computer resistance (sort of)
 * Can be recovered from signatures anyway (later lesson)
-* There is at least one ethereum address with multiple valid private keys
+* We know there is at least one ethereum address with multiple valid private keys
   * Why?
 
 </script></section>
@@ -531,6 +529,13 @@ On blockchains, almost always **elliptic curves**
 
 </script></section>
 
+
+
+<section data-markdown><script type="text/template">
+
+## End of lesson
+
+</script></section>
 
 
 
