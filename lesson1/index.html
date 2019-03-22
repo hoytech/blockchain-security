@@ -334,13 +334,13 @@ $h = H(m)$
 
 ## Hashing mistake 2: Equivalent inputs
 
-    function hashUserInfo(username, userId) {
-        return sha1(username + userId);
+    function uniqueUserId(username, accountId) {
+        return sha1(username + accountId);
     }
 
-`hashUserInfo("john", 234)`
+`uniqueUserId("john", 234)`
 
-`hashUserInfo("john2", 34)`
+`uniqueUserId("john2", 34)`
 
 </script></section>
 
@@ -402,7 +402,7 @@ Digital signatures let you create messages such as
 
 ## Public and private keys
  
-* Use a true RNG to create a private key
+* Use good randomness to choose a private key
   * Always keep your private key secret!
 * Each private key has a corresponding public key
   * Your public key is your bitcoin/ethereum address

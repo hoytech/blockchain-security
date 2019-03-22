@@ -33,7 +33,6 @@ blockchain architecture
     * merkle trees
   * transactions
     * structure of transactions
-      * https://programtheblockchain.com/posts/2017/12/29/how-ethereum-transactions-work/
     * errors
   * ecrecover
   * EVM

@@ -167,7 +167,7 @@
 
 ## Replay prevention
 
-* UTXO model: a transaction "spends" a UTXO, invalidating it so it cannot be spent again
+* UTXO model: a transaction spends one or more UTXOs, invalidating them so they cannot be spent again
 * Account model: each account has a counter, and each transaction has a sequence number
   * To apply a transaction, its sequence number must be the next account counter number
   * After applying the transaction, the account counter is incremented
@@ -275,8 +275,8 @@
 | Term        | Intuition  |
 | ------------- | -----|
 | gas&nbsp;used | How many units of gas your car needed to drive to the store |
-| gas&nbsp;limit | How many units of gas you chose to buy before driving to the store. If it wasn't enough you won't make it there |
 | gas&nbsp;price | How much each unit of gas cost at the time you purchased it |
+| gas&nbsp;limit | How many units of gas you chose to buy before driving to the store. If it wasn't enough you didn't make it there (but you're refunded what you didn't use) |
 
 </script></section>
 
@@ -333,7 +333,7 @@
 ## What do full nodes do
 
 * Full nodes communicate over a gossip protocol
-* Exchange new transactions, and new blocks as they are mined
+* Exchange new pending transactions, and new blocks as they are mined
 * Verify that every transaction in every block follows the rules
 * Some full nodes also manage private keys and create transactions on behalf of users
   * This is now regarded as bad design
@@ -363,8 +363,8 @@
 ## Data formats
 
 * In JSON-RPC, many inputs and outputs are hex-encoded (string with a "0x" prefix)
-* ETH values are always in Wei (there are 10<sup>18</sup> wei in 1 ETH)
 * Numeric values are in [big endian](https://en.wikipedia.org/wiki/Endianness), [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement)
+* ETH values are always in Wei (there are 10<sup>18</sup> wei in 1 ETH)
 
 </script></section>
 
@@ -467,12 +467,27 @@ Then run:
 </script></section>
 
 
+
 <section data-markdown><script type="text/template">
 
 <img src="password_strength.png" width="70%"/>
 <br/>[xkcd 936](https://www.xkcd.com/936/)
 
 </script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## [Sidebar] Key Derivation Functions
+
+* Similar to hash functions, except hash functions are designed to be fast. KDFs are designed to be **slow**
+* If you have a small preimage domain (like typical user passwords) then you want to make it as slow/expensive as possible to guess combinations
+  * Don't use hashes for password storage. Use a good KDF like bcrypt or argon2
+
+</script></section>
+
 
 
 
@@ -488,17 +503,6 @@ Then run:
 
 </script></section>
 
-
-
-<section data-markdown><script type="text/template">
-
-## [Sidebar] Key Derivation Functions
-
-* Similar to hash functions, except hash functions are designed to be fast, KDFs are designed to be slow
-* If you have a small preimage domain (like typical user passwords) then you want to make it as slow/expensive as possible to guess combinations
-  * Don't use hashes for password storage. Use a good KDF like bcrypt or argon2
-
-</script></section>
 
 
 
@@ -525,6 +529,20 @@ After ganache-cli is started, change metamask to point to it (instead of the mai
 <img src="metamask-change-network.png" width="35%" />
 
 </script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Accounts in metamask
+
+* You may notice that your accounts are the same after you change networks in metamask
+* This is normal: An account is just a private key and an address. It can be used on any network
+* You may have a balance on one network and a different balance on another
+
+</script></section>
+
 
 
 
