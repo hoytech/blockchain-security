@@ -1,0 +1,28 @@
+<style>
+body { font-size: 20px; }
+div { margin-top: 20px; }
+
+ul > li {
+  margin-top: 10px;
+}
+</style>
+
+<h1>Lab 4: Creating Transactions</h1>
+
+<div>
+  Using the private keys printed out when you started ganache-cli, write a script in a language of your choice to send ETH to an address. Connect to ganache-cli with metamask, send ETH to your metamask address, and verify your balance increased in the metamask interface. Include the script in your submission.
+</div>
+
+<ul>
+  <li>Although not required, I suggest you use node.js (JavaScript) and the <a href="https://docs.ethers.io/ethers.js/html/">ethers.js</a> library. You can install ethers like so:
+<div>
+<pre>
+$ npm install ethers
+</pre>
+</div>
+  </li>
+
+  <li>You will need to create a new <a href="https://docs.ethers.io/ethers.js/html/api-providers.html">JsonRpcProvider</a> with the URL of <code>http://localhost:8545</code></li>
+  <li>Then create a new <a href="https://docs.ethers.io/ethers.js/html/api-wallet.html">Wallet</a>, passing in a private key and the JsonRpcProvider instance</li>
+  <li>Then call the <code>sendTransaction</code> method on the wallet</li>
+</ul>

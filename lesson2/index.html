@@ -292,7 +292,7 @@
 
 <section data-markdown><script type="text/template">
 
-## Exercise: Let's look at some example transactions
+## Demo: Let's look at some example transactions
 
 [example-transactions.html](example-transactions.html)
 
@@ -335,6 +335,33 @@
 * Some full nodes also manage private keys and create transactions on behalf of users
   * This is now regarded as bad design
   * Prefer separation of key management from node software
+
+</script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## JSON-RPC
+
+* In order to expose functionality, most node software offers *Remote Procedural Call* interfaces
+* Most common is JSON-RPC, which is just JSON messages sent over HTTP
+  * Default Ethereum JSON-RPC port is 8545
+* [Documentation](https://github.com/ethresearch/en-ethereum-wiki/blob/master/json-rpc.md)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Data formats
+
+* In JSON-RPC, many inputs and outputs are hex-encoded (string with a "0x" prefix)
+* ETH values are always in Wei (there are 10<sup>18</sup> wei in 1 ETH)
+* Numeric values are in [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement)
 
 </script></section>
 
@@ -384,35 +411,13 @@ Then run:
 
 
 
-<section data-markdown><script type="text/template">
-
-## JSON-RPC
-
-* In order to expose functionality, most node software offers *Remote Procedural Call* interfaces
-* Most common is JSON-RPC, which is just JSON messages sent over HTTP
-  * Default Ethereum JSON-RPC port is 8545
-* [Documentation](https://github.com/ethresearch/en-ethereum-wiki/blob/master/json-rpc.md)
-
-</script></section>
 
 
 
 
 <section data-markdown><script type="text/template">
 
-## Data formats
-
-* In JSON-RPC, many inputs and outputs are hex-encoded (string with a "0x" prefix)
-* Numeric values are in [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement)
-* ETH values are always in Wei (there are 10<sup>18</sup> wei in 1 ETH)
-
-</script></section>
-
-
-
-<section data-markdown><script type="text/template">
-
-## Exercise: Query node directly
+## Lab 3: Query node directly
 
 [query-jsonrpc.html](query-jsonrpc.html)
 
@@ -455,7 +460,40 @@ Then run:
   * Communicate with nodes to upload transactions and read state of the chain
   * Provide an API for *dapps* to interact with the wallet
     * dapps should not have access to user's private keys!
-* Most popular interface is Metamask
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+<img src="password_strength.png" width="70%"/>
+<br/>[xkcd 936](https://www.xkcd.com/936/)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Mnemonics
+
+* Memorising/backing up 64 character hexadecimal private keys is not user-friendly
+* Random selection of dictionary words has high entropy and is memorable
+* Alternative: HD Wallets
+  * 12 dictionary words
+  * You can create lots of private keys from a single seed phrase
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## [Sidebar] Key Derivation Functions
+
+* Similar to hash functions, except hash functions are designed to be fast, KDFs are designed to be slow
+* If you have a small preimage domain (like typical user passwords) then you want to make it as slow/expensive as possible to guess combinations
+* Don't use hashes for password storage. Use a good KDF like bcrypt or argon2
 
 </script></section>
 
@@ -465,15 +503,36 @@ Then run:
 
 ## Metamask
 
-* Metamask is a browser extension
-* Manages your private keys
+* Very popular wallet
+* A browser extension that manages private keys
+  * Websites cannot access the private keys
 * Creates transactions
 * Download it from [https://metamask.io](https://metamask.io) 
-  * Backup your seed words safely
+  * Backup your seed words safely!
 
 </script></section>
 
 
+
+<section data-markdown><script type="text/template">
+
+## Choose network in metamask
+
+After ganache-cli is started, change metamask to point to it (instead of the mainnet or a testnet):
+
+<img src="metamask-change-network.png" width="35%" />
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Lab 4: Creating transactions
+
+[creating-transactions.html](creating-transactions.html)
+
+</script></section>
 
 
 
