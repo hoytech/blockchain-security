@@ -63,6 +63,8 @@
 
 *Doug Hoyte, March 2019*
 
+[https://bit.ly/2Wf9p8v](https://bit.ly/2Wf9p8v)
+
 </script></section>
 
 
@@ -265,7 +267,7 @@ $h = H(m)$
 * Be careful when anonymizing names/IPs/emails/etc by hashing
 * If there aren't that many possible secrets, you can just try all of them
 * Lab 1: [preimage.html](preimage.html)
-* So much for "one-way" function
+  * So much for "one-way" function
  
 </script></section>
 
@@ -422,7 +424,7 @@ Let's say all you have is a preimage-attack resistant hash function.
 
 Suppose you want to sign a 1 bit message:
 
-  * Private key: 2 random secrets $r_0$ and $r_1$
+  * Private key: 2 random secrets $r_0$, $r_1$
   * Public key: $H(r_0), H(r_1)$
   * To sign the message `0`, reveal $r_0$
   * To sign the message `1`, reveal $r_1$
@@ -453,7 +455,7 @@ On blockchains, almost always **elliptic curves**
 
 * This is the type of elliptic curve signature used by Bitcoin, Ethereum, others
 * Private keys are 32 bytes
-* Public keys are 64 bytes (more later)
+* Public keys are 64 bytes (more on this later)
 * Signatures are 64 bytes
 
 </script></section>
@@ -513,8 +515,8 @@ On blockchains, almost always **elliptic curves**
 ## Why hash public keys?
 
 * Smaller (20 bytes instead of 64)
-* Quantum computer resistance (sort of)
 * Can be recovered from signatures anyway (later lesson)
+* Quantum computer resistance (sort of)
 * We know there is at least one ethereum address with multiple valid private keys
   * Why?
 
