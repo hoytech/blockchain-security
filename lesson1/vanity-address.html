@@ -9,12 +9,12 @@ ul > li {
 
 <h1>Lab 1: Vanity Ethereum Address</h1>
 
-<div>Find a private key with a corresponding Ethereum address that starts with "0x1234". Include all code you used in your submission.</div>
+<div>In a language of your choice, write a program to find a private key with a corresponding Ethereum address that starts with "0x1234".</div>
 
 <ul>
   <li>Make sure you generate your private key safely!</li>
   <li>Make sure your random number is actually a valid private key</li>
-  <li>HINT: Use <a href="https://www.npmjs.com/package/ethereumjs-util">ethereumjs-util</a> JavaScript package
-  <li>Don't use the privateToAddress method: use privateToPublic and keccak256</li>
-  <li>Extra to think about: Assuming sha3(x) is uniformly distributed, what is the probability your neighbour generates the same address as you?</li>
+  <li>HINT: Use the <a href="https://www.npmjs.com/package/ethereumjs-util">ethereumjs-util</a> JavaScript package</li>
+  <li>Don't use the privateToAddress method. Instead, use privateToPublic and keccak256 so you demonstrate you understand the address generation process, and practice hashing and the use of buffers</li>
+  <li>Extra to think about: Assuming keccak256(x) is uniformly distributed, what is the probability your neighbour generates the same address as you?</li>
 </ul>
