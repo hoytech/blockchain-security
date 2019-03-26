@@ -20,7 +20,6 @@ blockchain crypto primitives
 
 
 
-
 blockchain architecture
   * account-based versus UTXO
   * consensus
@@ -29,19 +28,50 @@ blockchain architecture
     * replay attacks
     * enforces ordering
   * gas
-  * storage
-    * merkle trees
   * transactions
     * structure of transactions
     * errors
-  * ecrecover
-  * EVM
   * smart contracts
-  * solidity
-  * solidity ABI
-  * function selectors
-  * revert/assert/require
   * ganache
+
+
+
+solidity programming
+  * contract addresses
+    ? create2
+  * how deployment works
+    * to field is 0
+    * data contains code to be executed during deployment
+  * storage/state
+    * lack of privacy
+    * merkle trees
+  * solidity
+  * bin/ABI
+  * modifiers
+  * msg.sender, etc
+  * function selectors
+  * fallback function
+    * functions without valid selectors
+    * only assume enough gas to log something
+  * difference between .call and a transaction
+    * visibility: private/public/external/internal
+  * pure/view
+  * payable
+  * revert/assert/require
+  * transactionality
+  * EVM
+  * ecrecover
+  * Checks-Effects-Interactions pattern
+    * https://solidity.readthedocs.io/en/v0.4.21/security-considerations.html#use-the-checks-effects-interactions-pattern
+  * calling other contracts
+
+  * some good examples for exercises: https://programtheblockchain.com/posts/
+    * something like: https://programtheblockchain.com/posts/2018/07/11/writing-a-trivial-multisig-wallet/
+    * remove the nonce for a replay attack
+
+
+
+
 
 
 * transaction costs
@@ -49,7 +79,6 @@ blockchain architecture
 
 
 
-  ? role of miners
 
 
 smart contract security
@@ -88,8 +117,6 @@ attacks
 
 
 
-Checks-Effects-Interactions pattern
-  * https://solidity.readthedocs.io/en/v0.4.21/security-considerations.html#use-the-checks-effects-interactions-pattern
 
 
 
@@ -102,12 +129,10 @@ consensus level security
   * double spends
   * front-running
   * timestamp manipulation
+  ? role of miners
 
 
 
-some good examples for exercises: https://programtheblockchain.com/posts/
-  * something like: https://programtheblockchain.com/posts/2018/07/11/writing-a-trivial-multisig-wallet/
-  * remove the nonce for a replay attack
 
 
 
