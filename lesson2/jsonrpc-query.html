@@ -1,7 +1,15 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+#outputError { color: red; }
+input { width: 600px; }
+</style>
+
 <script>
-fetch('http://localhost:8545', {
+function doQuery() {
+  fetch(document.getElementById('url').value, {
     method: 'post',
-    body: JSON.stringify({"method":"eth_getBalance","params":["0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"]}),
+    body: JSON.stringify({"method":document.getElementById('method').value,"params":[document.getElementById('param').value]}),
   })
   .then(
     function(response) {
@@ -11,13 +19,36 @@ fetch('http://localhost:8545', {
         return;
       }
 
-      // Examine the text in the response
       response.json().then(function(data) {
         console.log(data);
+
+        if (data.error) {
+          document.getElementById('output').innerText = '';
+          document.getElementById('outputError').innerText = JSON.stringify(data, null, 4);
+        } else {
+          document.getElementById('output').innerText = JSON.stringify(data, null, 4);
+          document.getElementById('outputError').innerText = '';
+        }
       });
     }
   )
   .catch(function(err) {
-    console.log('Fetch Error :-S', err);
+    console.log('Fetch Error', err);
+    document.getElementById('outputError').innerText = err;
+    document.getElementById('output').innerText = '';
   });
+}
 </script>
+
+<div>
+URL: <input id="url" value="http://localhost:8545" /> <br/>
+Method: <input id="method" value="eth_getBalance" /> <br/>
+Param: <input id="param" value="0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1" /> <br/>
+<button onclick="doQuery()">Query JSON-RPC</button>
+</div>
+
+<div>
+OUTPUT:<br/>
+<pre id="output"></pre>
+<pre id="outputError"></pre>
+</div>

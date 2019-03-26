@@ -165,6 +165,7 @@
 
 
 
+
 <section data-markdown><script type="text/template">
 
 ## Replay prevention
@@ -176,6 +177,16 @@
 
 </script></section>
 
+
+
+
+<section data-markdown><script type="text/template">
+
+## Account model (Ethereum)
+
+<img src="replay.svg" style="background-color: white" />
+
+</script></section>
 
 
 
@@ -221,7 +232,7 @@
 
 * <span class="big-and-bold">N</span>umber you can only use <span class="big-and-bold">ONCE</span>
 * Ethereum sometimes calls the account counter and/or the transaction sequence number a *nonce*
-* Sort of a misnomer in Ethereum:
+* Sort of a bad name in Ethereum:
   * Not harmful to re-use a nonce, because only one transaction will make it onto the chain
   * This is only way to cancel a pending transaction
 * Ensures transactions applied in expected order
@@ -276,22 +287,33 @@
 
 | Term        | Intuition  |
 | ------------- | -----|
-| gas&nbsp;used | How many units of gas your car needed to drive to the store |
+| gas&nbsp;limit | How many units of gas you buy before driving to the store. If there isn't enough you won't make it there (but you're refunded what you don't use) |
 | gas&nbsp;price | How much each unit of gas cost at the time you purchased it |
-| gas&nbsp;limit | How many units of gas you chose to buy before driving to the store. If it wasn't enough you didn't make it there (but you're refunded what you didn't use) |
+| gas&nbsp;used | How many units of gas your car needed to drive to the store |
 
 </script></section>
 
 
 <section data-markdown><script type="text/template">
 
-## No from field?
+## Why no from field?
 
 * The transaction contains the ethereum address being sent *to*
 * But why doesn't it contain the address the transaction is being sent *from*?
   * Because it can be recovered from the signature
+  * We'll see how this works later when we discuss `ecrecover`
 
 </script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## 15 minute break
+
+</script></section>
+
 
 
 
@@ -302,15 +324,6 @@
 [example-transactions.html](example-transactions.html)
 
 </script></section>
-
-
-
-<section data-markdown><script type="text/template">
-
-## 15 minute break
-
-</script></section>
-
 
 
 
@@ -366,6 +379,7 @@
 
 * In JSON-RPC, many inputs and outputs are hex-encoded (string with a "0x" prefix)
 * Numeric values are in [big endian](https://en.wikipedia.org/wiki/Endianness), [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement)
+  * Not essential to understand now: explained later
 * ETH values are always in Wei (there are 10<sup>18</sup> wei in 1 ETH)
 
 </script></section>
@@ -379,11 +393,11 @@
 
 A simple solution for testing and experimenting is `ganache-cli`. Install it:
 
-    $ npm install ganache-cli
+    $ npm install -g ganache-cli
 
 Then run:
 
-    $ ./node_modules/.bin/ganache-cli -d
+    $ ganache-cli -d
 
 (The `-d` makes it so the accounts are the same every time)
 
@@ -395,7 +409,7 @@ Then run:
 
 ## Starting ganache-cli
 
-    $ ./node_modules/.bin/ganache-cli -d
+    $ ganache-cli -d
     Ganache CLI v6.4.1 (ganache-core: 2.5.3)
 
     Available Accounts
@@ -422,9 +436,10 @@ Then run:
 
 <section data-markdown><script type="text/template">
 
-## Lab 2: Query node directly
+## Exercise: Query node directly
 
-[query-jsonrpc.html](query-jsonrpc.html)
+    $ curl http://localhost:8545 -d '{"method":"eth_getBalance","params":["0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"],"id":1}'
+    {"id":1,"result":"0x56bc75e2d63100000"}
 
 </script></section>
 
