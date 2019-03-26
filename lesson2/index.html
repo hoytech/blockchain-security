@@ -310,20 +310,20 @@
 
 <section data-markdown><script type="text/template">
 
-## 15 minute break
-
-</script></section>
-
-
-
-
-<section data-markdown><script type="text/template">
-
 ## Exercise: Let's look at some real transactions
 
 [example-transactions.html](example-transactions.html)
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## 15 minute break
+
+</script></section>
+
 
 
 
@@ -431,15 +431,15 @@ Then run:
 
 
 
-
-
-
 <section data-markdown><script type="text/template">
 
 ## Exercise: Query node directly
 
-    $ curl http://localhost:8545 -d '{"method":"eth_getBalance","params":["0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"],"id":1}'
-    {"id":1,"result":"0x56bc75e2d63100000"}
+[jsonrpc-query.html](jsonrpc-query.html)
+
+* Make sure ganache is running
+* Try querying the balance of some accounts
+* What about accounts that don't exist? Do they throw errors?
 
 </script></section>
 
@@ -565,7 +565,7 @@ After ganache-cli is started, change metamask to point to it (instead of the mai
 
 <section data-markdown><script type="text/template">
 
-## Lab 3: Creating transactions
+## Lab 2: Creating transactions
 
 [creating-transactions.html](creating-transactions.html)
 
