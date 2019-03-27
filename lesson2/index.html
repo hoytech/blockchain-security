@@ -87,7 +87,7 @@
 ## Lesson Topics
 
 * Transactions
-* Nodes and RPC
+* Blocks and nodes
 * Interfaces
 
 </script></section>
@@ -126,8 +126,8 @@
 * When applying a transaction to the DB, everyone in the world must get the same resulting DB
 * So: all transactions must be **deterministic**
   * Cannot get input from outside world
-  * Cannot generate random numbers
   * Cannot depend on anything except what is already in the DB
+  * Cannot generate random numbers
 
 </script></section>
 
@@ -275,7 +275,7 @@
 
 * Every operation performed by a transaction takes a certain amount of gas
 * The transaction must pay the sum of all gas it used times the `gasPrice` it offered to pay
-* If the transaction uses more than its `gasLimit` then all its effects are reverted (but the fee is still payed!)
+* If the transaction uses more than its `gasLimit` then all its effects are reverted (but the fee is still spent!)
 
 </script></section>
 
@@ -326,10 +326,45 @@
 
 
 
+<section data-markdown><script type="text/template">
+
+## Blocks
+
+<img src="block.svg" style="background-color: white" />
+
+* A block is a collection of transactions
+
+</script></section>
+
+
 
 <section data-markdown><script type="text/template">
 
-## Blockchain nodes
+## Blockchain
+
+<img src="blockchain.svg" style="background-color: white" />
+
+* A blockchain is a sequence of blocks
+* Each block is linked to the previous by embedding its hash
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Miners
+
+* Miners are the entities that actually make the blocks
+* They can't modify the contents of transactions (since they are signed)
+* But, they choose which transactions to include, and the order of those transactions inside the block
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Nodes
 
 * Blockchains are *peer-to-peer* protocols
 * The initial concept is that every user in the system runs the same software
@@ -458,16 +493,27 @@ Then run:
 
 <section data-markdown><script type="text/template">
 
-## Interfaces
+## Node interfaces
 
 * JSON-RPC is a *low-level* interface to a node
-* Most programmers interact with a higher-layer library
+* Most programmers interact with a higher-level library
   * [web3.js](https://web3js.readthedocs.io/en/1.0/) (JS)
   * [ethers.js](https://docs.ethers.io/ethers.js/html/) (JS)
   * [Web3.py](https://web3py.readthedocs.io/en/stable/) (Python)
 
 </script></section>
 
+
+
+<section data-markdown><script type="text/template">
+
+## Web3/Dapps
+
+* Concept: Web pages that talk to a blockchain as a backend instead of a central server
+* Users are in control of their identity and data
+* Later in this course we will learn how to securely build dapps (decentralized apps)
+
+</script></section>
 
 
 
@@ -535,6 +581,8 @@ Then run:
   * Backup your seed words safely!
 
 </script></section>
+
+
 
 
 
