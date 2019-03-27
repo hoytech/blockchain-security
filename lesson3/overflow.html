@@ -1,0 +1,43 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+li { margin-top: 20px; }
+</style>
+
+<h1>Exercise: Overflow</h1>
+
+<ul>
+
+<li>Go to <a href="https://remix.ethereum.org">https://remix.ethereum.org</a></li>
+
+<li>Create a new file (+ button in top left)</li>
+
+<li>Enter this solidity code:
+
+<pre>
+pragma solidity ^0.5.0;
+
+contract Test {
+    function addOne(uint256 a) public pure returns(uint256) {
+        require(a + 1 > a, "sorry, a is too big");
+        return a + 1;
+    }
+}
+</pre>
+</li>
+
+<li>Compile the code with the button in the Compile tab (or typing control-s)</li>
+
+<li>Deploy the code with the button the the Run tab (it deploys it to a test EVM in your browser by default)</li>
+
+<li>See your new contract in the Deployed Contracts section of Run tab: "Test at 0x..."</li>
+
+<li>Expand the Test contract</li>
+
+<li>Enter values in the addOne field and press the addOne label to trigger a transaction to your contract</li>
+
+<li>Observe the output in the console</li>
+
+<li>What value do you need to enter to get it to overflow?</li>
+
+</ul>

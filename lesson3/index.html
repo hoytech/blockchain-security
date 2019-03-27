@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Introduction to Blockchain Security Practices</title>
+
+    <meta name="author" content="Doug Hoyte">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="../reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="../reveal.js/css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="../reveal.js/lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? '../reveal.js/css/print/pdf.css' : '../reveal.js/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="../reveal.js/lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <style>
+      .reveal .slides h1, .reveal .slides h2, .reveal .slides h3 {
+        text-transform: none;
+      }
+
+      .two-column {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .two-column em {
+        margin: 20px;
+      }
+
+      .reveal .big-and-bold {
+        font-weight: bold;
+        font-size: 135%;
+      }
+
+      .reveal .shrunk-a-bit {
+        font-size: 90%;
+      }
+
+      .reveal .shrunk-a-bit pre {
+        width: 100%;
+      }
+
+      .reveal pre {
+        width: 100%;
+      }
+
+      .reveal .highlight {
+        color: yellow;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+<!------------------------------------------------------->
+
+
+
+<section data-markdown><script type="text/template">
+
+## Introduction to Blockchain Security Practices
+
+### Lesson 3: Solidity Programming
+
+*Doug Hoyte, March 2019*
+
+[https://is.gd/blockchainsec](https://is.gd/blockchainsec)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Lesson Topics
+
+* Contracts
+* B
+* C
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Smart contracts
+
+* Computer programs
+* Have their own ethereum addresses
+* Called "autonomous agents"
+  * After you send them to the blockchain, they exist forever (unless they self destruct)
+  * Anyone can send transactions to them to trigger functionality
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Solidity
+
+* A programming language, like C++ or Python or Javascript
+* But designed specially for smart contracts
+* Runs on a special machine called the Ethereum Virtual Machine (EVM) 
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+```
+    pragma solidity ^0.5.0;
+
+    contract MyContractName {
+        // code goes here
+    }
+```
+
+* `pragma` line: What version of solidity you want
+  * We'll leave this out of examples, but you should always have it in your code
+* `contract`: Everything inside the curly braces is your contract
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+```
+contract SimpleAdder {
+    function addOne(uint256 a) public pure returns(uint256) {
+        return a + 1;
+    }
+}
+```
+
+* Functions are similar to in other languages:
+  * Accept parameters
+  * Perform computations and actions
+  * Optionally can return a result
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Types
+
+<pre>
+    function addOne(<span class="highlight">uint256</span> a) public pure returns(<span class="highlight">uint256</span>)
+</pre>
+
+* Parameters, return values, and variables have types that determine what they can contain
+* *uint256*
+  * unsigned (can't be negative)
+  * integer
+  * 256 bits (32 bytes)
+
+</script></section>
+
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Access restrictions
+
+<pre>
+    function addOne(uint256 a) <span class="highlight">public</span> pure returns(uint256)
+</pre>
+
+* Who can call the function
+  * *public*: Everyone
+  * *private*: Only other functions in this contract
+  * *external*: Everyone, except other functions in this contract
+  * *internal*: Like *private*, except for inheritance (more later)
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Storage restrictions
+
+<pre>
+    function addOne(uint256 a) public <span class="highlight">pure</span> returns(uint256)
+</pre>
+
+* Contracts have a persistent memory called storage (or sometimes state)
+* This will preserve values between transactions
+  * *pure*: Doesn't read or write to storage
+  * *view*: Only reads from storage
+  * None: Writes to storage
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Overflows
+
+```
+function addOne(uint256 a) public pure returns(uint256) {
+    return a + 1;
+}
+```
+
+* `addOne(x)` should always be bigger than `x` right?
+  * **No!**
+  * The output needs to fit into a `uint256`
+  * Adding `1` to the biggest `uint256` value (2<sup>256</sup>-1)
+    * Can't fit in a **uint256**
+    * So it will wrap back to 0
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## require
+
+```
+function addOne(uint256 a) public pure returns(uint256) {
+    require(a + 1 > a, "sorry, a is too big");
+    return a + 1;
+}
+```
+
+* When you want to check user input is valid
+* If first argument evaluates to false, entire transaction is aborted
+* Second argument is a user-friendly description of problem
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Exercise
+
+[overflow.html](overflow.html)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## assert
+
+```
+function addOne(uint256 a) public pure returns(uint256) {
+    require(a + 1 > a, "sorry, a is too big");
+    uint256 output = a + 1;
+    assert(output > 0); // impossible for it to be 0
+    return output;
+}
+```
+
+* When you are sure something is true, but want to put in a check **just in case you are wrong**
+* This is useful for special programs that analyze your code so they can prove things about it
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## 15 minute break
+
+</script></section>
+
+
+
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## End of lesson
+
+</script></section>
+
+
+<!------------------------------------------------------->
+
+
+      </div>
+
+    </div>
+
+    <script src="../reveal.js/lib/js/head.min.js"></script>
+    <script src="../reveal.js/js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'none', // none/fade/slide/convex/concave/zoom
+
+	math: {
+          mathjax: '../lib/MathJax/MathJax.js',
+          config: 'TeX-AMS_SVG-full',
+	},
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '../reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: '../reveal.js/plugin/math/math.js', async: true },
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
