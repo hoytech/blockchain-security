@@ -242,7 +242,7 @@ function addOne(uint256 a) public pure returns(uint256) {
   * The output needs to fit into a `uint256`
   * Adding `1` to the biggest `uint256` value (2<sup>256</sup>-1)
     * Can't fit in a **uint256**
-    * So it will wrap back to 0
+    * So it will wrap (overflow) back to 0
 
 </script></section>
 
@@ -270,9 +270,20 @@ function addOne(uint256 a) public pure returns(uint256) {
 
 <section data-markdown><script type="text/template">
 
-## Exercise
+## assert
 
-[overflow.html](overflow.html)
+```
+function addOne(uint256 a) public pure returns(uint256) {
+    require(a + 1 > a, "sorry, a is too big");
+    uint256 output = a + 1;
+    assert(output > 0); // should be impossible
+    return output;
+}
+```
+
+* When you are sure something is true, but want to put in a check **just in case you are wrong**
+* Don't use it for validating user input (use `require`)
+* `assert` is used by special programs that analyze your code so they can prove things about it
 
 </script></section>
 
@@ -280,19 +291,9 @@ function addOne(uint256 a) public pure returns(uint256) {
 
 <section data-markdown><script type="text/template">
 
-## assert
+## Exercise
 
-```
-function addOne(uint256 a) public pure returns(uint256) {
-    require(a + 1 > a, "sorry, a is too big");
-    uint256 output = a + 1;
-    assert(output > 0); // impossible for it to be 0
-    return output;
-}
-```
-
-* When you are sure something is true, but want to put in a check **just in case you are wrong**
-* This is useful for special programs that analyze your code so they can prove things about it
+[overflow.html](overflow.html)
 
 </script></section>
 
@@ -307,6 +308,84 @@ function addOne(uint256 a) public pure returns(uint256) {
 
 
 
+<section data-markdown><script type="text/template">
+
+## Storage
+
+```
+contract SimpleCounter {
+    uint256 public counter = 0;
+
+    function increment() public {
+        counter = counter + 1;
+    }
+}
+```
+
+* This contract has a single storage value: `counter`
+* Every time `increment()` is called, goes up by 1
+  * Should we worry about overflow?
+* The counter is `public` so it automatically creates a getter function named `counter`
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Storage privacy
+
+* Storage members can also be marked `private` or `internal`
+* All this does is stop public accessor functions from being created
+* **IT DOES NOT HIDE THE VALUES FROM AN ATTACKER**
+  * Hiding is impossible because every node must know these values for consensus to work
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Atomic transactions
+
+```
+contract SimpleCounter {
+    uint256 public counter = 0;
+
+    function add(uint256 a) public {
+        uint256 oldCounter = counter;
+        counter += a;
+        require(counter > oldCounter, "overflow!");
+    }
+}
+```
+
+* Checking for overflow *after* we have modified storage
+* When `require` or `assert` trigger a failure, all storage changes are "rolled back" (put back to how they were before)
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+```
+contract SimpleCounter {
+    uint256 public counter = 0;
+
+    function increment() public {
+        uint256 oldCounter = counter;
+        counter += a;
+        require(counter > oldCounter, "overflow!");
+    }
+}
+```
+
+* Checking for overflow *after* we have modified storage
+* When `require` or `assert` trigger a failure, all storage changes are "rolled back" (put back to how they were before)
+
+</script></section>
 
 
 

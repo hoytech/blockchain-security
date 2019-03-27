@@ -17,7 +17,7 @@ li { margin-top: 20px; }
 <pre>
 pragma solidity ^0.5.0;
 
-contract Test {
+contract TestOverflow {
     function addOne(uint256 a) public pure returns(uint256) {
         require(a + 1 > a, "sorry, a is too big");
         return a + 1;
@@ -30,9 +30,9 @@ contract Test {
 
 <li>Deploy the code with the button the the Run tab (it deploys it to a test EVM in your browser by default)</li>
 
-<li>See your new contract in the Deployed Contracts section of Run tab: "Test at 0x..."</li>
+<li>See your new contract in the Deployed Contracts section of Run tab: "TestOverflow at 0x..."</li>
 
-<li>Expand the Test contract</li>
+<li>Expand the TestOverflow contract</li>
 
 <li>Enter values in the addOne field and press the addOne label to trigger a transaction to your contract</li>
 
