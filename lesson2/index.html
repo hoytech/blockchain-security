@@ -542,18 +542,6 @@ Then run:
 
 
 
-<section data-markdown><script type="text/template">
-
-## [Sidebar] Key Derivation Functions
-
-* Similar to hash functions, except hash functions are designed to be fast. KDFs are designed to be **slow**
-* If you have a small preimage domain (like typical user passwords) then you want to make it as slow/expensive as possible to guess combinations
-  * Don't use hashes for password storage. Use a good KDF like bcrypt or argon2
-
-</script></section>
-
-
-
 
 <section data-markdown><script type="text/template">
 
@@ -564,6 +552,19 @@ Then run:
 * Alternative: HD Wallets
   * 12 dictionary words
   * You can create lots of private keys from a single seed phrase
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## [Sidebar] Key Derivation Functions
+
+* Similar to hash functions, except hash functions are designed to be fast. KDFs are designed to be **slow**
+* If you have a small preimage domain (like typical user passwords) then you want to make it as slow/expensive as possible to guess combinations
+  * Don't use hashes for password storage. Use a good KDF like bcrypt or argon2
 
 </script></section>
 
