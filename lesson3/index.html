@@ -66,6 +66,11 @@
         color: yellow;
         font-weight: bold;
       }
+
+      .reveal .highlightRed {
+        color: red;
+        font-weight: bold;
+      }
     </style>
   </head>
 
@@ -109,6 +114,7 @@
 ## Smart contracts
 
 * Computer programs
+* Created by transactions
 * Have their own ethereum addresses
 * Called "autonomous agents"
   * After you send them to the blockchain, they exist forever (unless they self destruct)
@@ -120,11 +126,32 @@
 
 <section data-markdown><script type="text/template">
 
+## Smart contract addresses
+
+* A contract's address is the hash of the creator's address and the nonce of the transaction that created it (RLP encoded)
+  * So, contracts do not have private keys
+* Contracts *do* have nonces
+  * Incremented whenever they deploy children contracts
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
 ## Solidity
 
 * A programming language, like C++ or Python or Javascript
 * But designed specially for smart contracts
-* Runs on a special machine called the Ethereum Virtual Machine (EVM) 
+* Compiles to a special machine called the Ethereum Virtual Machine (EVM) 
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+<img src="solc.svg" style="background-color: white" />
 
 </script></section>
 
@@ -150,6 +177,8 @@
 
 <section data-markdown><script type="text/template">
 
+## Functions
+
 ```
 contract SimpleAdder {
     function addOne(uint256 a) public pure returns(uint256) {
@@ -158,7 +187,7 @@ contract SimpleAdder {
 }
 ```
 
-* Functions are similar to in other languages:
+* Functions are similar to other languages:
   * Accept parameters
   * Perform computations and actions
   * Optionally can return a result
@@ -360,8 +389,20 @@ contract SimpleCounter {
 }
 ```
 
-* Checking for overflow *after* we have modified storage
+* Notice we are checking for overflow *after* we have modified storage
 * When `require` or `assert` trigger a failure, all storage changes are "rolled back" (put back to how they were before)
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Special variables
+
+* There are [special variables](https://solidity.readthedocs.io/en/v0.5.3/units-and-global-variables.html#special-variables-and-functions) available, including:
+  * `msg.sender` - The address of who called your function (usually who created the transaction)
+  * `block.timestamp` - The current time
+  * `block.number` - The current block height
 
 </script></section>
 
@@ -370,20 +411,48 @@ contract SimpleCounter {
 
 <section data-markdown><script type="text/template">
 
-```
-contract SimpleCounter {
-    uint256 public counter = 0;
+## Access control: msg.sender
+ 
+<pre class="hljs js">
+contract MyContract {
+    uint256 public myPersonalNumber = 0;
 
-    function increment() public {
-        uint256 oldCounter = counter;
-        counter += a;
-        require(counter > oldCounter, "overflow!");
+    function changePersonalNumber(uint256 newNum) public {
+        require(msg.sender == 0x1234..., "only I can change this");
+        setPersonalNumber(newNum);
+    }
+
+    function setPersonalNumber(uint256 newNum) public {
+        myPersonalNumber = newNum;
     }
 }
-```
+</pre>
 
-* Checking for overflow *after* we have modified storage
-* When `require` or `assert` trigger a failure, all storage changes are "rolled back" (put back to how they were before)
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Oops...
+
+<pre class="hljs js">
+contract MyContract {
+    uint256 public myPersonalNumber = 0;
+
+    function changePersonalNumber(uint256 newNum) public {
+        require(msg.sender == 0x1234..., "only I can change this");
+        setPersonalNumber(newNum);
+    }
+
+    function setPersonalNumber(uint256 newNum) <span class="highlightRed">public</span> {
+        myPersonalNumber = newNum;
+    }
+}
+</pre>
+
+* Don't laugh: One contract with this bug [got hacked and lost $30M](https://blog.zeppelin.solutions/on-the-parity-wallet-multisig-hack-405a8c12e8f7)
+* Make sure functions are marked `private`!
 
 </script></section>
 
