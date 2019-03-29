@@ -401,6 +401,7 @@ contract SimpleCounter {
 
 * There are [special variables](https://solidity.readthedocs.io/en/v0.5.3/units-and-global-variables.html#special-variables-and-functions) available, including:
   * `msg.sender` - The address of who called your function (usually who created the transaction)
+  * `msg.value` - Amount of wei sent
   * `block.timestamp` - The current time
   * `block.number` - The current block height
 
@@ -418,7 +419,7 @@ contract MyContract {
     uint256 public myPersonalNumber = 0;
 
     function changePersonalNumber(uint256 newNum) public {
-        require(msg.sender == 0x1234..., "only I can change this");
+        <span class="highlight">require(msg.sender == 0x1234..., "only I can change this");</span>
         setPersonalNumber(newNum);
     }
 
@@ -451,8 +452,137 @@ contract MyContract {
 }
 </pre>
 
-* Don't laugh: One contract with this bug [got hacked and lost $30M](https://blog.zeppelin.solutions/on-the-parity-wallet-multisig-hack-405a8c12e8f7)
+* Don't laugh: A contract with this bug [got hacked and lost $30M](https://blog.zeppelin.solutions/on-the-parity-wallet-multisig-hack-405a8c12e8f7)
 * Make sure functions are marked `private`!
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## constructor
+
+<pre class="hljs js">
+contract MyContract {
+    address owner;
+
+    <span class="highlight">constructor() public {
+        owner = msg.sender;
+    }</span>
+
+    function doStuff() public {
+        require(msg.sender == owner, "only owner can do stuff");
+        // do owner stuff
+    }
+}
+</pre>
+
+* Code that is run only once: when contract is created
+* Can take arguments, like a regular function
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Custom modifiers
+
+<pre class="hljs js">
+    <span class="highlight">modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }</span>
+
+    function doStuff() public <span class="highlight">onlyOwner</span> {
+        // do owner stuff
+    }
+</pre>
+
+* Wraps a function with some custom code
+* The `_;` is replaced with the function body (in this case, `doStuff`'s body)
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## payable
+
+<pre class="hljs js">
+    function deposit() public <span class="highlight">payable</span> {
+        require(<span class="highlight">msg.value</span> >= 1 ether, "please send more");
+    }
+</pre>
+
+* Functions marked with `payable` can receive ether
+* If the transaction succeeds, it is added to the contract's balance
+* `msg.value` is how much was sent
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## fallback function
+
+<pre class="hljs js">
+    function () external payable {
+        // thanks for the funds
+    }
+</pre>
+
+<pre class="hljs js">
+    function () external payable {
+        require(false, "please don't just send me ETH");
+    }
+</pre>
+
+* If somebody calls an unknown function, or no function at all, the *fallback function* is called
+* It's just a regular function, but has no name
+* Often used to accept (or decline) direct ETH transfers to a contract
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Sending ETH
+
+<pre class="hljs js">
+    function withdrawAll() public {
+        totalAmount = <span class="highlight">address(this).balance</span>;
+        <span class="highlight">msg.sender.transfer</span>(totalAmount);
+    }
+</pre>
+
+* `this` is the current contract (and can be turned into an address)
+* `msg.sender` is also an address
+* address objects have various properties:
+  * `balance`: How much ETH is owned by this address
+  * `transfer`: Method to send ETH *to* this address
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Lab 3
+
+[tipjar.html](tipjar.html)
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## 15 minute break
 
 </script></section>
 
