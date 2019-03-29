@@ -100,9 +100,10 @@
 
 ## Lesson Topics
 
-* Contracts
-* B
-* C
+* Smart contracts
+  * Structure
+  * Programming
+  * Data-structures
 
 </script></section>
 
@@ -158,6 +159,8 @@
 
 
 <section data-markdown><script type="text/template">
+
+## Structure
 
 ```
     pragma solidity ^0.5.0;
@@ -267,11 +270,12 @@ function addOne(uint256 a) public pure returns(uint256) {
 ```
 
 * `addOne(x)` should always be bigger than `x` right?
-  * **No!**
-  * The output needs to fit into a `uint256`
+  * **No**. The output needs to fit into a `uint256`
   * Adding `1` to the biggest `uint256` value (2<sup>256</sup>-1)
     * Can't fit in a **uint256**
     * So it will wrap (overflow) back to 0
+* Multiplication can also overflow
+* Subtraction can *under*flow
 
 </script></section>
 
@@ -305,7 +309,7 @@ function addOne(uint256 a) public pure returns(uint256) {
 function addOne(uint256 a) public pure returns(uint256) {
     require(a + 1 > a, "sorry, a is too big");
     uint256 output = a + 1;
-    assert(output > 0); // should be impossible
+    assert(output != 0); // 0 should be impossible
     return output;
 }
 ```
@@ -313,8 +317,30 @@ function addOne(uint256 a) public pure returns(uint256) {
 * When you are sure something is true, but want to put in a check **just in case you are wrong**
 * Don't use it for validating user input (use `require`)
 * `assert` is used by special programs that analyze your code so they can prove things about it
+  * And no user-friendly message
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## SafeMath
+
+* You'll see contracts that use `safeAdd`, `safeMul`, and `safeSub`
+* These are functions that check to see if an overflow has been thrown and fail with an `assert` if so:
+
+<pre class="hljs js">
+    function safeAdd(uint256 a, uint256 b)
+                 private pure returns(uint256) {
+        uint c = a + b;
+        assert(c >= a && c >= b);
+        return c;
+    }
+</pre>
+
+</script></section>
+
 
 
 
@@ -452,8 +478,8 @@ contract MyContract {
 }
 </pre>
 
-* Don't laugh: A contract with this bug [got hacked and lost $30M](https://blog.zeppelin.solutions/on-the-parity-wallet-multisig-hack-405a8c12e8f7)
 * Make sure functions are marked `private`!
+* Don't laugh: A contract with this bug [got hacked and lost $30M](https://blog.zeppelin.solutions/on-the-parity-wallet-multisig-hack-405a8c12e8f7)
 
 </script></section>
 
@@ -580,11 +606,149 @@ contract MyContract {
 </script></section>
 
 
+
 <section data-markdown><script type="text/template">
 
 ## 15 minute break
 
 </script></section>
+
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Mappings
+
+<pre class="hljs js">
+    <span class="highlight">mapping(address => uint256) balance;</span>
+
+    function deposit() public payable {
+        <span class="highlight">balance[msg.sender]</span> += msg.value;
+    }
+</pre>
+
+* Like a "dictionary" or "hash-table" or in other languages
+* Values are `0` by default
+* A look-up table. In this case:
+  * Look-up an `address`, get a `uint256`
+  * Do we need to worry about overflow here?
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Arrays
+
+<pre class="hljs js">
+    <span class="highlight">address[] users;</span>
+
+    function addMyself() public {
+        <span class="highlight">users.push</span>(msg.sender);
+    }
+
+    function richestUser() public view returns(address) {
+        address richest = address(0);
+        uint256 richestBalance = 0;
+
+        for (uint256 i = 0; i < <span class="highlight">users.length</span>; i++) {
+            if (<span class="highlight">users[i]</span>.balance > richestBalance) {
+                richest = <span class="highlight">users[i]</span>;
+            }
+        }
+
+        return richest;
+    }
+</pre>
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Problems with arrays
+
+* Our previous example has a couple bugs:
+  * How do you ensure that the same user doesn't get added *twice* to the `users` array?
+  * If the `users` array gets too big, we may not be able to loop over it without running out of gas
+    * **block gas limit**: an upper limit on how much gas a transaction can possibly consume
+    * If possible, avoid using loops at all, especially if you don't know how many iterations needed
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Prefer mappings over arrays
+
+* Mappings use less gas
+  * Arrays have to update `length`
+* You can easily delete a mapping
+  * Arrays need special code to swap an item with the last entry
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Strings
+
+<pre class="hljs js">
+    <span class="highlight">string</span> name = <span class="highlight">"Alice"</span>;
+</pre>
+
+* Solidity supports strings, which are arbitrary length arrays of characters
+* Try to avoid using strings, if possible
+  * Handling strings in solidity is difficult
+  * Long strings cost a lot of gas
+  * Better to store a hash of the string
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Structs
+
+<pre class="hljs js">
+    struct Account {
+        uint256 balance;
+        uint256 lastUpdatedTimestamp;
+    }
+
+    struct User {
+        string name;
+        mapping(address => Account) accounts;
+    }
+</pre>
+
+* For grouping together multiple values into a single new type
+* Can contain other structs, mappings, etc
+
+</script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Lab 4
+
+[tipjar.html](tipjar.html)
+
+</script></section>
+
 
 
 
