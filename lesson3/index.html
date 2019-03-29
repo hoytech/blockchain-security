@@ -172,6 +172,7 @@
 
 * `pragma` line: What version of solidity you want
   * We'll leave this out of examples, but you should always have it in your code
+  * Use at least `0.5.0`: This course does not cover security aspects of earlier versions
 * `contract`: Everything inside the curly braces is your contract
 
 </script></section>
@@ -261,6 +262,13 @@ contract SimpleAdder {
 
 <section data-markdown><script type="text/template">
 
+<img src="rollover.jpg" />
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
 ## Overflows
 
 ```
@@ -275,7 +283,6 @@ function addOne(uint256 a) public pure returns(uint256) {
     * Can't fit in a **uint256**
     * So it will wrap (overflow) back to 0
 * Multiplication can also overflow
-* Subtraction can *under*flow
 
 </script></section>
 
@@ -318,6 +325,26 @@ function addOne(uint256 a) public pure returns(uint256) {
 * Don't use it for validating user input (use `require`)
 * `assert` is used by special programs that analyze your code so they can prove things about it
   * And no user-friendly message
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Underflows
+
+<pre class="hljs js">
+    uint256 balance;
+
+    function withdraw(uint256 amount) {
+        require(<span class="highlightRed">balance - amount</span> &gt;= 0, "insufficient funds");
+    }
+</pre>
+
+* If `amount` is greater than `balance`, the subtraction underflows
+* In fact, this require is pointless:
+  * *All* `uint256` values are `>= 0` (that's what unsigned means)
 
 </script></section>
 
@@ -744,8 +771,6 @@ contract MyContract {
 <section data-markdown><script type="text/template">
 
 ## Lab 4
-
-[tipjar.html](tipjar.html)
 
 </script></section>
 
