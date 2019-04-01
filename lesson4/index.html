@@ -125,7 +125,7 @@
 
 <section data-markdown><script type="text/template">
 
-## Way too obvious:
+## Way too obvious
 
 <pre class="hljs js">
     function soLongSuckers() {
@@ -133,13 +133,15 @@
     }
 </pre>
 
+<img src="solongsuckers.png" />
+
 </script></section>
 
 
 
 <section data-markdown><script type="text/template">
 
-## What about this?
+## What about this one?
 
 <pre class="hljs js">
     uint256 ownerReward;
@@ -184,43 +186,40 @@
 * Some contracts are designed so they can be *upgraded*
 * In this case, the owner can modify the code of the contract, but preserve balances, token allowances, etc
   * **Good**: Owner can fix bugs in the contract before bad guys can exploit them
-  * **Bad**: If owner is a bad guy, can add in new exploits later on
+  * **Bad**: If owner is a bad guy, can add a back-door
 
 </script></section>
 
 
 <section data-markdown><script type="text/template">
- 
+
 ## Proxy contracts
- 
+
 * Upgradable contracts are implemented using proxy contracts
 * A simple contract lives at a stable address
-* It forwards all requests to another contract, at an address that can be changed by the owner
+  * It forwards all requests to another contract, at an address that can be changed by the owner
 * Inter-contract interaction like this needs to be considered carefully from a security perspective
 
 </script></section>
 
 
 
-
-
-
 <section data-markdown><script type="text/template">
 
-## Sending payouts
+## Transfer to a contract
 
 * Suppose you need to send payouts to two addresses:
 <pre class="hljs js">
     addr1.transfer(payout1);
     addr2.transfer(payout2);
 </pre>
-* If `addr2` is the address of a contract, it could have a fallback function:
+* If `addr2` is the address of a contract, it could have a fallback function like this:
 <pre class="hljs js">
     function () {
         require(false);
     }
 </pre>
-* `addr1`'s payout would be stuck (see [King of the Ether](https://www.kingoftheether.com/postmortem.html))
+* `addr2` causes `addr1`'s payout to be stuck (see [King of the Ether](https://www.kingoftheether.com/postmortem.html))
 
 </script></section>
 
@@ -230,12 +229,12 @@
 
 ## Withdrawal pattern
 
-* It is better to record how much each address is owed, and allow each address to claim their payout separately:
+* It is better to record how much each address is owed:
 <pre class="hljs js">
     balances[addr1] += payout1;
     balances[addr2] += payout2;
 </pre>
-
+* And then allow each address to claim their payouts separately:
 <pre class="hljs js">
     function withdraw() {
         uint256 amount = balances[msg.sender];
@@ -294,7 +293,7 @@
 
 ## Forwarding gas
 
-* We noted above that `transfer` forwards 2,300 gas
+* We noted before that `transfer` forwards 2,300 gas
 * If sending to a contract, this lets the fallback function run a little bit of code
 * Why would we want to do this?
   * The fallback function may want to record something when it accepts ETH
@@ -308,12 +307,128 @@
 
 ## Re-entrancy
 
-* When a function calls itself (usually indirectly)
+* When a contract calls itself (usually indirectly)
 * Typical flow:
   * Contract A calls contract B
   * Contract B calls *back into* contract A
+    * If contract A was in the middle of some operation and it unexpectedly starts a new operation, this can be security problem
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Global variables
+
+* Re-entrancy is not specific to smart contracts
+* Any programming language with callbacks has this issue
+* Global variables are usually the root of the problem: calling functions might leave them in inconsistent states when calling callbacks
+  * Contract storage is a global variable
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Deadlock (pseudo-code)
+
+    let globalLock = false;
+
+    function doOperation(callback) {
+        waitForGlobalLock();
+        globalLock = true;
+
+        let result = doSomeStuff();
+        callback(result);
+
+        globalLock = false;
+    }
+
+What if called like so:
+
+    doOperation((result) => {
+        doOperation(someCallback);
+    });
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## The DAO
+
+* "Decentralized Autonomous Organization"
+* Basically a corporation, but on the blockchain
+* Was hacked for $50M
+  * Most famous Ethereum security bug
+  * Resulted in Ethereum Classic fork
+  * Bug was due to unanticipated re-entrancy
+
+</script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## The DAO Bug
+
+    function withdraw(uint amount) public {
+       require(balance[msg.sender] >= amount, "no balance");
+       msg.sender.call.value(amount)("");
+       balance[msg.sender] -= amount;
+    }
+
+* As mentioned, `msg.sender.call` forwards unlimited gas
+  * So, if `msg.sender` is a contract, its fallback function can do lots of stuff
+  * Including calling `withdraw` *again*
+    * Try to walk through what would happen
+
+</script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Protecting against re-entrancy
+
+* Use `transfer` since it limits the amount of gas available to the fallback
+  * 2,300 gas is just enough to log, but not enough to do bad things like write to storage
+* Leave storage in a consistent state when running callbacks ("preserve invariants")
+  * Here, the invariant is that `balance[msg.sender]` always holds the amount owed to `msg.sender`
+  * Checks-Effects-Interactions pattern
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Checks-Effects-Interactions
+
+    function withdraw(uint amount) public {
+       // Checks
+       require(balance[msg.sender] >= amount, "no balance");
+
+       // Effects
+       balance[msg.sender] -= amount;
+
+       // Interactions
+       msg.sender.call.value(amount)("");
+    }
+
+* Called the [CEI pattern](https://solidity.readthedocs.io/en/latest/security-considerations.html#use-the-checks-effects-interactions-pattern)
+* Note the order of last two operations was swapped from The DAO's version
+
+</script></section>
+
 
 
 

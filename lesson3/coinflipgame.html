@@ -1,0 +1,50 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+li { margin-top: 20px; }
+</style>
+
+<h1>Lab 4: Coin Flip Game</h1>
+
+<div>Modify the <code>generateRandomBit()</code> function in the <code>CoinFlipGame</code> contract below to generate a random coin flip. Your submission should be the solidity program.</div>
+
+<pre>
+pragma solidity ^0.5.0;
+
+contract CoinFlipGame {
+    constructor() public payable {
+    }
+    
+    function bet() public payable {
+        require(msg.value <= maxBet(), "bet size too big");
+        
+        if (generateRandomBit()) {
+            msg.sender.transfer(msg.value * 2);
+        }
+    }
+    
+    function maxBet() public view returns(uint256) {
+        return address(this).balance / 10;
+    }
+    
+    function generateRandomBit() private view returns(bool) {
+        // MODIFY ME to randomly return either true or false
+    }
+}
+</pre>
+
+<ul>
+
+<li>
+You can use any of the solidity <a href="https://solidity.readthedocs.io/en/v0.5.3/units-and-global-variables.html#special-variables-and-functions">special variables</a>, hash functions like <code>keccak256()</code>, and/or any other method you like.
+</li>
+
+<li>
+Note: The remix IDE doesn't implement <code>blockhash()</code> properly. If you choose to use this function, test on a ganache instance
+</li>
+
+<li>
+Try to make the random bit as difficult as possible to predict, since you don't want anybody to have an unfair advantage. In a later lab we'll see if anybody can cheat and predict your random bits.
+</li>
+
+</ul>

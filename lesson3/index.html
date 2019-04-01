@@ -241,6 +241,8 @@ contract SimpleAdder {
 
 
 
+
+
 <section data-markdown><script type="text/template">
 
 ## Storage restrictions
@@ -256,6 +258,25 @@ contract SimpleAdder {
   * None: Writes to storage
 
 </script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Primitive types
+
+* **uintX**: `X` is the number of bits: `uint256`, `uint32`, `uint8`
+* **intX**: Same as `uintX` except signed (negatives allowed): `int256`, `int64`
+* **bytesX**: Fixed size collection of bytes: `bytes32`
+* **bool**: Boolean: `true` or `false`
+* **string**: Dynamic-size collection of characters
+* **bytes**: Dynamic-size collection of bytes
+
+</script></section>
+
+
 
 
 
@@ -358,7 +379,7 @@ function addOne(uint256 a) public pure returns(uint256) {
   * Multiplication can also overflow
   * `x` is not necessarily positive after this:
     <pre>if (x < 0) x *= -1;</pre>
-    * When `x` is most negative `int256`
+    * When `x` is most negative integer
 </script></section>
 
 
@@ -718,7 +739,7 @@ contract MyContract {
   * How do you ensure that the same user doesn't get added *twice* to the `users` array?
   * If the `users` array gets too big, we may not be able to loop over it without running out of gas
     * **block gas limit**: an upper limit on how much gas a transaction can possibly consume
-    * If possible, avoid using loops at all, especially if you don't know how many iterations needed
+* Array length can underflow, [disabling bounds checks](https://github.com/Arachnid/uscc/tree/master/submissions-2017/doughoyte)
 
 </script></section>
 
@@ -732,6 +753,8 @@ contract MyContract {
   * Arrays have to update `length`
 * You can easily delete a mapping
   * Arrays need special code to swap an item with the last entry
+* Main use of arrays is so you can loop over them:
+  * If possible, avoid using loops, especially if you don't know how many iterations needed
 
 </script></section>
 
@@ -784,6 +807,8 @@ contract MyContract {
 <section data-markdown><script type="text/template">
 
 ## Lab 4
+
+[coinflipgame.html](coinflipgame.html)
 
 </script></section>
 
