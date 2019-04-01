@@ -282,7 +282,6 @@ function addOne(uint256 a) public pure returns(uint256) {
   * Adding `1` to the biggest `uint256` value (2<sup>256</sup>-1)
     * Can't fit in a **uint256**
     * So it will wrap (overflow) back to 0
-* Multiplication can also overflow
 
 </script></section>
 
@@ -346,6 +345,20 @@ function addOne(uint256 a) public pure returns(uint256) {
 * In fact, this require is pointless:
   * *All* `uint256` values are `>= 0` (that's what unsigned means)
 
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Numeric ranges
+
+* In general, if values can be controlled by an attacker, make sure you are careful when performing artithmetic on them
+  * Multiplication can also overflow
+  * `x` is not necessarily positive after this:
+    <pre>if (x < 0) x *= -1;</pre>
+    * When `x` is most negative `int256`
 </script></section>
 
 

