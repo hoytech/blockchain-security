@@ -172,7 +172,7 @@
 
 * `pragma` line: What version of solidity you want
   * We'll leave this out of examples, but you should always have it in your code
-  * Use at least `0.5.0`: This course does not cover security aspects of earlier versions
+  * Use at least `0.5.0`: This course does not cover security issues of earlier versions
 * `contract`: Everything inside the curly braces is your contract
 
 </script></section>
@@ -608,6 +608,9 @@ contract MyContract {
 * Functions marked with `payable` can receive ether
 * If the transaction succeeds, it is added to the contract's balance
 * `msg.value` is how much was sent
+* `1 ether` is using [solidity's units feature](https://solidity.readthedocs.io/en/latest/units-and-global-variables.html#ether-units)
+  * `ether` just multiplies by `1e18`
+    * Untyped! Use carefully
 
 </script></section>
 
@@ -655,6 +658,23 @@ contract MyContract {
   * `transfer`: Method to send ETH *to* this address
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Self-destruct
+
+<pre class="hljs js">
+    selfdestruct(beneficiary);
+</pre>
+
+* Removes the contract code from the blockchain
+* Sends all ETH owned by the contract to the beneficiary address (often `msg.sender`)
+* Be very careful with this
+
+</script></section>
+
 
 
 
@@ -797,6 +817,30 @@ contract MyContract {
 
 * For grouping together multiple values into a single new type
 * Can contain other structs, mappings, etc
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Logs/Events
+
+* Contracts can define events:
+<pre class="hljs js">
+event LogDeposit(address indexed account, uint256 amount);
+</pre>
+* That can be `emit`ted inside functions:
+<pre class="hljs js">
+    function deposit() public payable {
+        // ...
+        emit LogDeposit(msg.sender, msg.value);
+    }
+</pre>
+* These logs are not accessible to contracts
+* But can be read by dapps that monitor the chain
+  * Also useful during development
 
 </script></section>
 

