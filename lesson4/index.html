@@ -158,6 +158,21 @@
 
 
 
+
+
+<section data-markdown><script type="text/template">
+
+## Contract upgrades
+
+* Some contracts are designed so they can be *upgraded*
+  * **Good**: Owner can fix bugs in the contract before bad guys can exploit them
+  * **Bad**: If owner is a bad guy, can add back-doors
+* Because a contract's code cannot be changed, upgradable contracts are implemented using *proxy contracts* (contracts that call other contracts)
+
+</script></section>
+
+
+
 <section data-markdown><script type="text/template">
 
 ## Plausible deniability
@@ -181,16 +196,6 @@
 </script></section>
 
 
-<section data-markdown><script type="text/template">
-
-## Contract upgrades
-
-* Some contracts are designed so they can be *upgraded*
-  * **Good**: Owner can fix bugs in the contract before bad guys can exploit them
-  * **Bad**: If owner is a bad guy, can add back-doors
-* Because a contract's code cannot be changed, upgradable contracts are implemented using *proxy contracts*
-
-</script></section>
 
 
 
@@ -201,7 +206,7 @@
 ## Autonomous agents
 
 * Contracts are independent entities
-  * They have balance
+  * They have an ETH balance
   * They have code, which cannot be changed
   * They live forever (unless they `selfdestruct`)
   * They can send and receive ETH
@@ -284,7 +289,7 @@
 
 ## Transfer to a contract
 
-* Suppose you need to send payouts to two addresses:
+* Suppose you need to send two payouts:
 <pre class="hljs js">
     addr1.transfer(payout1);
     addr2.transfer(payout2);
@@ -295,7 +300,7 @@
         require(false);
     }
 </pre>
-* `addr2` causes `addr1`'s payout to be stuck (see [King of the Ether](https://www.kingoftheether.com/postmortem.html))
+* `addr2` causes whole transaction to fail, including payout to `addr1` (see [King of the Ether bug](https://www.kingoftheether.com/postmortem.html))
 
 </script></section>
 
@@ -351,13 +356,81 @@ interface VaultInterface {
 
 <section data-markdown><script type="text/template">
 
-## Exercise
+## Single-use contracts
 
-[atomic-operations.html](atomic-operations.html)
+<pre class="hljs js">
+contract SingleUseContract {
+    constructor() public payable {
+        // do operations
+
+        <span class="highlight">selfdestruct(msg.sender);</span>
+    }
+}
+</pre>
+
+* Perform operations in a contract's constructor, and then `selfdestruct` when finished
+  * One of the few valid use cases for `selfdestruct`
 
 </script></section>
 
 
+
+
+<section data-markdown><script type="text/template">
+
+## Atomic operations
+
+<pre class="hljs js">
+contract BankFundsMover {
+    constructor(BankInterface bank1, BankInterface bank2) public {  
+        bank1.withdraw();
+        bank2.deposit();
+
+        selfdestruct(msg.sender);
+    }
+}
+</pre>
+
+* Either **both** the withdrawal and deposit will happen, or **neither** will
+* No other transaction can sneak in between the withdrawal and deposit
+* They happen as an **atomic unit**
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Condition checking
+
+<pre class="hljs js">
+contract ConditionalTipper {
+    constructor(TipJarInterface tipjar, address preferredOwner)
+                  public payable {
+        if (tipjar.owner == preferredOwner) {
+            tipjar.transfer(msg.value);
+        }
+
+        selfdestruct(msg.sender);
+    }
+}
+</pre>
+
+* You want to send a tip to a Tipjar (Lab #3), but only if the owner is a particular address
+* You could check before you send transaction, but owner might change between when you create transaction and when it is mined
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Exercise
+
+[conditional-tipper.html](conditional-tipper.html)
+
+</script></section>
 
 
 
@@ -367,6 +440,69 @@ interface VaultInterface {
 
 </script></section>
 
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## On-chain randomness
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Detecting contract callers
+
+* Can we detect if the caller is a contract instead of an EOA?
+* Attempt 1 (from [Fomo 3D](https://www.reddit.com/r/ethereum/comments/916xni/how_to_pwn_fomo3d_a_beginners_guide/)):
+<pre class="hljs js">
+    modifier isHuman() {
+      address _addr = msg.sender;
+      uint256 _codeLength;
+
+      assembly {_codeLength := extcodesize(_addr)}
+      require(_codeLength == 0, "sorry humans only");
+      _;
+    }
+</pre>
+
+  * Doesn't work: code size is 0 inside a contract's constructor
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Detecting contract callers (2)
+
+* Attempt 2:
+<pre class="hljs js">  
+    modifier isHuman() {
+      require(tx.origin == msg.sender, "sorry humans only");
+      _;
+    }
+</pre>
+
+  * Works, but:
+    * Legitimate contract users cannot use your contract (ie multi-sig wallets)
+    * Ethereum will eventually get rid of `tx.origin()`
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Lab 5
+
+[hack-coinflipgame.html](hack-coinflipgame.html)
+
+</script></section>
 
 
 
@@ -453,7 +589,7 @@ What if called like so:
        balance[msg.sender] -= amount;
     }
 
-* As mentioned, `msg.sender.call` forwards unlimited gas
+* As mentioned, `.call` forwards unlimited gas
   * So, if `msg.sender` is a contract, its fallback function can do lots of stuff
   * Including calling `withdraw` *again*
     * Try to walk through what would happen
@@ -466,11 +602,10 @@ What if called like so:
 
 <section data-markdown><script type="text/template">
 
-## Protecting against re-entrancy
+## Preserve invariants
 
-* Use `transfer` since it limits the amount of gas available to the fallback
-  * 2,300 gas is just enough to log, but not enough to do bad things like write to storage
-* Leave storage in a consistent state when calling other contracts ("preserve invariants")
+* An invariant is something that should always be true
+* Leave storage in a consistent state when calling other contracts
   * Here, the invariant is that `balance[msg.sender]` always holds the amount owed to `msg.sender`
   * Checks-Effects-Interactions pattern
 
@@ -499,6 +634,40 @@ What if called like so:
 
 </script></section>
 
+
+
+<section data-markdown><script type="text/template">
+
+## Limit forwarded gas
+
+* If all you want to do is send ETH, use `transfer` since it limits the amount of gas available to the fallback
+  * 2,300 gas is just enough to log, but not enough to do bad things like write to storage
+* You can also manually limit the gas forwarded:
+      someContract.someFunc.gas(10000)();
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Re-entrancy guard
+
+<pre class="hljs js">
+    bool private locked = false;
+
+    modifier nonReentrant() {
+        require(!locked, "re-entrancy detected");
+        locked = true;
+        _;
+        locked = false;
+    }
+</pre>
+
+* Good solution, but adds 5,000 gas to each call
+  * Will be almost free if [EIP-1283](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1283.md) deployed
+
+</script></section>
 
 
 
@@ -533,7 +702,7 @@ contract SimpleDAO {
 
 ## Lab 5
 
-[daohack.html](daohack.html)
+[hack-simpledao.html](hack-simpledao.html)
 
 </script></section>
 
