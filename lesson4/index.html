@@ -490,10 +490,64 @@ contract ConditionalTipper {
 </pre>
 
   * Works, but:
-    * Legitimate contract users cannot use your contract (ie multi-sig wallets)
-    * Ethereum will eventually get rid of `tx.origin()`
+    * Legitimate contract users cannot use your contract (ex: multi-sig wallets)
+    * Ethereum will eventually get rid of `tx.origin` ("account abstraction")
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Miner attacks
+
+* Even if you succeed in blocking contracts calling your contract, your dice game is still vulnerable to miners
+* Miners control the exact construction of a block
+  * They can simulate running a transaction that bets on the Coin Flip Game
+  * Only include it in their blocks if it will win
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Commitment schemes
+
+* Cryptographic protocol for 2 or more parties to come to a consensus on a random value
+* Commonly known as commit-reveal
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Commit phase
+
+* Two parties: A, B
+* Each generates a secret random value: r<sub>A</sub>, r<sub>B</sub>
+* Each publishes a hash of their secret: H(r<sub>A</sub>), H(r<sub>B</sub>)
+* Once the hashes have been downloaded, commit phase ends and reveal phase begins...
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Reveal phase
+
+* Each reveals their random values: r<sub>A</sub>, r<sub>B</sub>
+* Each computes the hash of the other's secret value: H(r<sub>A</sub>), H(r<sub>B</sub>)
+* Each verifies that the value the other published in the commit phase matches what they computed
+* Combine r<sub>A</sub> and r<sub>B</sub> to create the random value
+  * Ways to combine: xor, `+`, `H(A . B)`
+
+</script></section>
+
+
+
 
 
 <section data-markdown><script type="text/template">
@@ -504,6 +558,13 @@ contract ConditionalTipper {
 
 </script></section>
 
+
+
+<section data-markdown><script type="text/template">
+
+## 15 minute break
+
+</script></section>
 
 
 
@@ -700,18 +761,12 @@ contract SimpleDAO {
 
 <section data-markdown><script type="text/template">
 
-## Lab 5
+## Lab 6
 
 [hack-simpledao.html](hack-simpledao.html)
 
 </script></section>
 
-
-<section data-markdown><script type="text/template">
-
-## 15 minute break
-
-</script></section>
 
 
 <section data-markdown><script type="text/template">
