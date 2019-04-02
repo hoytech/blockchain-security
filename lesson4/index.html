@@ -100,9 +100,10 @@
 
 ## Lesson Topics
 
-* Attack models
-* Inter-contract interaction
+* Threat models
+* Contract interactions
 * On-chain randomness
+* Re-entrancy
 
 </script></section>
 
@@ -111,11 +112,11 @@
 
 <section data-markdown><script type="text/template">
 
-## Attack models
+## Threat models
 
 * Model 1: Contract writer is trusted
   * Must worry about all bugs we've discussed so far (overflows, visibility, etc)
-* Model 2: Contract writer is malicious
+* Model 2: Contract writer may be malicious
   * *Underhanded* contracts
   * Must worry about everything in model 1, as well as possibility contract writer added a hidden back-door
 
@@ -125,10 +126,10 @@
 
 <section data-markdown><script type="text/template">
 
-## Way too obvious
+## Obvious back-door
 
 <pre class="hljs js">
-    function soLongSuckers() {
+    function soLongSuckers() public onlyOwner {
         owner.transfer(address(this).balance);
     }
 </pre>
@@ -141,7 +142,7 @@
 
 <section data-markdown><script type="text/template">
 
-## What about this one?
+## What about this?
 
 <pre class="hljs js">
     uint256 ownerReward;
@@ -172,13 +173,12 @@
 </pre>
 
 * Should be `-=`, not `=-`
-* This bug lets owner streal all ETH in contract
-  * Why?
+* This bug lets owner steal all ETH in contract
+  * How?
 * But, if detected, owner can claim:
-  * *Oops sorry. It was just a typo, I wasn't trying to steal your money, I promise*
+  * *Oops sorry. It was just a typo, I wasn't going to steal your money, I promise*
 
 </script></section>
-
 
 
 <section data-markdown><script type="text/template">
@@ -186,23 +186,45 @@
 ## Contract upgrades
 
 * Some contracts are designed so they can be *upgraded*
-* In this case, the owner can modify the code of the contract, but preserve balances, token allowances, etc
   * **Good**: Owner can fix bugs in the contract before bad guys can exploit them
-  * **Bad**: If owner is a bad guy, can add a back-door
+  * **Bad**: If owner is a bad guy, can add back-doors
+* Because a contract's code cannot be changed, upgradable contracts are implemented using *proxy contracts*
+
+</script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Autonomous agents
+
+* Contracts are independent entities
+  * They have balance
+  * They have code, which cannot be changed
+  * They live forever (unless they `selfdestruct`)
+  * They can send and receive ETH
+  * They can call functions in other contracts
+  * They can create other contracts
 
 </script></section>
 
 
 <section data-markdown><script type="text/template">
 
-## Proxy contracts
+## Contract interactions
 
-* Because a contract's code cannot be changed, upgradable contracts are implemented using proxy contracts
-* A simple contract lives at a stable address
-  * It sends all requests to another contract, at an address that can be changed by the owner
-* Inter-contract interaction like this needs to be considered carefully from a security perspective
+* EOA sends ETH to an EOA
+  * Simple value transfer, no code run
+* EOA calls contract
+  * Called contract runs code which can:
+    * Send ETH
+    * Call other contracts
+    * Create contracts
 
 </script></section>
+
 
 
 
@@ -215,9 +237,9 @@
 * Recall that a transaction can do either or both:
   * Send ETH
   * Invoke a function on a contract
-* When you call `transfer()` you are:
+* When you call `someAddr.transfer()` you are:
   * Sending ETH
-  * *and* invoking the target's fallback function (if it exists)
+  * *and* invoking the target's fallback function (if it is a contract)
 
 </script></section>
 
@@ -228,11 +250,11 @@
 
 ## Forwarding gas
 
-* When you call another contract's function, you can choose how much gas to "forward" to it
-  * Forward just means the amount of your own gas you are allowing it to burn
+* When you call another contract, you can choose how much gas to "forward" to it
+  * Forward just means the amount of your own gas you are allowing it to use
 * `transfer` forwards 2,300 gas
   * Small amount: Just enough for the fallback function to log an event
-  * But not enough to do certain bad things (discussed soon)
+  * But not enough to do things like write to storage
 
 </script></section>
 
@@ -306,15 +328,15 @@
 
 ## Interfaces
 
-* An interface is a `contract` definition that just lists available functions:
+* An interface is an abstract contract definition that only contains function *signatures*:
 <pre class="hljs js">
-contract VaultInterface {
-    function balance() public view returns(uint256);
-    function deposit() public payable;
-    function withdraw(uint256 amount) public;
+interface VaultInterface {
+    function balance() external view returns(uint256);
+    function deposit() external payable;
+    function withdraw(uint256 amount) external;
 }
 </pre>
-* Then in your contract, you can use it to treat an `address` as a contract and call functions on it:
+* Then in your contract, you can convert an `address` to the interface and call functions on it:
 <pre class="hljs js">
     VaultInterface v = VaultInterface(vaultAddr);
     uint256 myBalance = v.balance(address(this));
@@ -346,18 +368,6 @@ contract VaultInterface {
 </script></section>
 
 
-
-<section data-markdown><script type="text/template">
-
-## Autonomous agents
-
-* Contracts are just like regular accounts
-  * They have balance
-  * They can send and receive ETH
-  * They are allowed to call functions in other contracts
-  * They are allowed to create other contracts
-
-</script></section>
 
 
 
@@ -409,7 +419,7 @@ contract VaultInterface {
 What if called like so:
 
     doOperation((result) => {
-        doOperation(someCallback);
+        doOperation((result) => {});
     });
 
 </script></section>
@@ -460,7 +470,7 @@ What if called like so:
 
 * Use `transfer` since it limits the amount of gas available to the fallback
   * 2,300 gas is just enough to log, but not enough to do bad things like write to storage
-* Leave storage in a consistent state when running callbacks ("preserve invariants")
+* Leave storage in a consistent state when calling other contracts ("preserve invariants")
   * Here, the invariant is that `balance[msg.sender]` always holds the amount owed to `msg.sender`
   * Checks-Effects-Interactions pattern
 
@@ -481,7 +491,7 @@ What if called like so:
        balance[msg.sender] -= amount;
 
        // Interactions
-       msg.sender.call.value(amount)("");
+       msg.sender.transfer(amount);
     }
 
 * Called the [CEI pattern](https://solidity.readthedocs.io/en/latest/security-considerations.html#use-the-checks-effects-interactions-pattern)
