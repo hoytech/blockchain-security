@@ -343,7 +343,7 @@ interface VaultInterface {
 * Then in your contract, you can convert an `address` to the interface and call functions on it:
 <pre class="hljs js">
     VaultInterface v = VaultInterface(vaultAddr);
-    uint256 myBalance = v.balance(address(this));
+    uint256 myBalance = v.balance();
     v.deposit.value(1 ether)();
     v.withdraw(1 ether);
 </pre>

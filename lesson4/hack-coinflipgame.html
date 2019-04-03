@@ -15,6 +15,16 @@ There are several ways to do this. Note that a single-use contract can check con
 </li>
 
 <li>
+Use the following interface:
+<pre>
+interface CoinFlipGameInterface {
+    function bet() external payable;
+    function maxBet() external view returns(uint256);
+}
+</pre>
+</li>
+
+<li>
 Since the maximum bet size is 1/10th the contract balance, you can't fully empty it. Try to make your hack take as much as it can using the fewest transactions possible.
 </li>
 
