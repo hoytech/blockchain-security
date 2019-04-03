@@ -511,8 +511,9 @@ contract ConditionalTipper {
 </pre>
 
   * Works, but:
-    * Legitimate contract users cannot use your contract (ex: multi-sig wallets)
-    * Ethereum will eventually get rid of `tx.origin` ("account abstraction")
+    * "Legitimate" contract users cannot use your contract (ex: multi-sig wallets)
+    * Ethereum will eventually get rid of `tx.origin`
+      * Account abstraction
 
 </script></section>
 
@@ -536,7 +537,7 @@ contract ConditionalTipper {
 
 ## Miner attacks
 
-* Even if you succeed in blocking contracts calling your contract, your dice game is still vulnerable to miners
+* Even if you block contracts from calling it, your coin flip game is still vulnerable to miners
 * Miners control the exact construction of a block
   * They can simulate running a transaction that bets on the Coin Flip Game
   * Only include it in their blocks if it will win
@@ -549,8 +550,10 @@ contract ConditionalTipper {
 
 ## Commitment schemes
 
-* There *is* a way to create secure randomness on-chain: *commit-reveal*
+* All is not lost...
+* There *is* a way to create secure randomness on-chain: *commit-reveal protocol*
   * Cryptographic protocol for 2 or more parties to come to a consensus on a value they all can agree is random
+  * 2 phases: commit phase, reveal phase
 
 </script></section>
 
@@ -561,9 +564,13 @@ contract ConditionalTipper {
 ## Commit phase
 
 * Assume two parties: A, B
-* Each generates a secret random value: r<sub>A</sub>, r<sub>B</sub>
-* Each publishes a hash of their secret: H(r<sub>A</sub>), H(r<sub>B</sub>)
-* After the hashes have been exchanged, commit phase ends and reveal phase begins...
+* Each generates a secret random value
+  * A generates r<sub>A</sub>
+  * B generates r<sub>B</sub>
+* They exchange hashes of their secrets
+  * A sends H(r<sub>A</sub>) to B
+  * B sends H(r<sub>B</sub>) to A
+* Commit phase ends and reveal phase begins...
 
 </script></section>
 
@@ -573,12 +580,11 @@ contract ConditionalTipper {
 
 ## Reveal phase
 
-* Each reveals their random values: r<sub>A</sub>, r<sub>B</sub>
-* Each computes the hash of the other's secret value: H(r<sub>B</sub>), H(r<sub>A</sub>)
-* Each verifies that the value the other published in the commit phase matches what they computed
-* Combine r<sub>A</sub> and r<sub>B</sub> to create the random value
-  * Ways to combine: xor, `+`, `H(A . B)`
-
+* They now exchange their random values and verify the hashes
+  * Now that r<sub>B</sub> is public, A computes H(r<sub>B</sub>) and verifies it's same as was received in commit phase
+  * B does the same with r<sub>A</sub>
+* Now that both parties have securely shared r<sub>A</sub> and r<sub>B</sub>, these values are combined into the final output
+  * Ways to combine: xor ($\oplus$), `+`, `H(A . B)`
 </script></section>
 
 
@@ -602,8 +608,8 @@ contract ConditionalTipper {
 
 * During the reveal phase, one party will see the other revealed numbers first
 * If this party's outcome is bad, they could choose to not reveal their secret number
-  * The punishment for failing to reveal should be at least as bad as a losing outcome
-
+* The punishment for failing to reveal should be at least as bad as a losing outcome
+  * Same for other protocol violations
 </script></section>
 
 
@@ -612,10 +618,10 @@ contract ConditionalTipper {
 ## Copied commitment
 
 * During the commit phase, one party could submit *the same hash* as the other party
-  * Depending on the combination, output may be predictable
+  * Depending on how the secrets are combined, output may be predictable
     * $r \oplus r = 0$
     * $r + r \bmod 2 = 0$
-  * Prevent copied commitments in the protocol
+  * Solution: Use non-predictable combine method, or prevent copied commitments in the protocol
 
 </script></section>
 
@@ -638,10 +644,10 @@ contract ConditionalTipper {
 ## Re-entrancy
 
 * When a contract calls itself (usually indirectly)
+* If a contract is in the middle of an operation and it unexpectedly starts a new operation, this can be security problem
 * Typical flow:
   * Contract A calls contract B
   * Contract B calls *back into* contract A
-    * If contract A was in the middle of some operation and it unexpectedly starts a new operation, this can be security problem
 
 </script></section>
 
@@ -651,10 +657,11 @@ contract ConditionalTipper {
 
 ## Global variables
 
-* Re-entrancy is not specific to smart contracts
-* Any programming language with callbacks has this issue
-* Global variables are usually the root of the problem: calling functions might leave them in inconsistent states when calling callbacks
-  * Contract storage is a global variable
+* Global variables are usually the root of the problem
+* Contract storage is a global variable
+  * It could be in an inconsistent state when calling other contracts
+* Not specific to smart contracts
+  * Any programming language with callbacks and global variables has this issue
 
 </script></section>
 
@@ -676,10 +683,12 @@ contract ConditionalTipper {
         globalLock = false;
     }
 
-What if called like so:
+Suppose it's called like this:
 
     doOperation((result) => {
-        doOperation((result) => {});
+        doOperation((result) => {
+            console.log("Did 2 operations");
+        });
     });
 
 </script></section>
@@ -723,15 +732,76 @@ What if called like so:
 
 
 
+<section data-markdown><script type="text/template">
+
+## Attack call-stack
+
+<pre class="hljs js">
+Hacker contract: <span class="highlightRed">dao.deposit.value(10)()</span>
+Hacker contract: <span class="highlightRed">dao.withdraw(10)</span>
+        The DAO:   msg.sender.transfer(10)
+Hacker fallback:     <span class="highlightRed">dao.withdraw(10)</span>
+        The DAO:       msg.sender.transfer(10)
+Hacker fallback:         <span class="highlightRed">dao.withdraw(10)</span>
+        The DAO:           msg.sender.transfer(10)
+        The DAO:           balance[msg.sender] -= 10
+        The DAO:       balance[msg.sender] -= 10
+        The DAO:   balance[msg.sender] -= 10
+</pre>
+
+* Hacker deposits 10 but withdraws 30
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Limit forwarded gas
+
+* If all you want to do is send ETH, use `transfer` since it limits the amount of gas available to the fallback
+  * 2,300 gas is just enough to log, but not enough to do bad things like write to storage
+* You can also manually limit the gas forwarded:
+      someContract.someFunc.gas(10000)();
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Re-entrancy guard
+
+<pre class="hljs js">
+    bool private locked = false;
+
+    modifier nonReentrant() {
+        require(!locked, "re-entrancy detected");
+        locked = true;
+        _;
+        locked = false;
+    }
+</pre>
+
+* Good solution, but adds 5,000 gas to each call
+  * Will be almost free if [EIP-1283](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1283.md) deployed
+
+</script></section>
+
+
+
 
 <section data-markdown><script type="text/template">
 
 ## Preserve invariants
 
+* Best solution: helps in many ways
 * An invariant is something that should always be true
-* Leave storage in a consistent state when calling other contracts
-  * Here, the invariant is that `balance[msg.sender]` always holds the amount owed to `msg.sender`
-  * Checks-Effects-Interactions pattern
+* In the DAO example, the invariant is that `balance[msg.sender]` always holds the amount owed to `msg.sender`
+  * Violated: Contract balance was debited but `balance` mapping in storage was not
+* Always leave storage in a consistent state when calling other contracts
 
 </script></section>
 
@@ -760,65 +830,17 @@ What if called like so:
 
 
 
-<section data-markdown><script type="text/template">
-
-## Limit forwarded gas
-
-* If all you want to do is send ETH, use `transfer` since it limits the amount of gas available to the fallback
-  * 2,300 gas is just enough to log, but not enough to do bad things like write to storage
-* You can also manually limit the gas forwarded:
-      someContract.someFunc.gas(10000)();
-
-</script></section>
-
 
 
 <section data-markdown><script type="text/template">
 
-## Re-entrancy guard
+## Beware optimizations
 
-<pre class="hljs js">
-    bool private locked = false;
-
-    modifier nonReentrant() {
-        require(!locked, "re-entrancy detected");
-        locked = true;
-        _;
-        locked = false;
-    }
-</pre>
-
-* Good solution, but adds 5,000 gas to each call
-  * Will be almost free if [EIP-1283](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1283.md) deployed
+* [Serious bug](https://medium.com/@richmcateer_93513/compounds-self-liquidation-bug-829d6571c2df) in Compound money market contract
+* Partially caused by minimizing the number of writes to storage as gas optimization
+* Always try to preserve invariants
 
 </script></section>
-
-
-
-<section data-markdown><script type="text/template">
-
-## SimpleDAO
-
-<pre class="hljs js">
-pragma solidity ^0.5.0;
-
-contract SimpleDAO {
-    mapping(address => uint) public balance;
-  
-    function deposit() public payable {
-        balance[msg.sender] += msg.value;
-    }
-
-    function withdraw(uint amount) public {
-       require(balance[msg.sender] >= amount, "no balance");
-       msg.sender.call.value(amount)("");
-       balance[msg.sender] -= amount;
-    }
-}
-</pre>
-
-</script></section>
-
 
 
 

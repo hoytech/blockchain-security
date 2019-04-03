@@ -1,0 +1,41 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+li { margin-top: 20px; }
+</style>
+
+<h1>Lab 6: Hack SimpleDAO</h1>
+
+<div>Write an attack contract in solidity to steal funds from the following <code>SimpleDAO</code> contract. Your submission should be the solidity program.</div>
+
+<pre>
+pragma solidity ^0.5.0;
+
+contract SimpleDAO {
+    mapping(address => uint) public balance;
+ 
+    function deposit() public payable {
+        balance[msg.sender] += msg.value;
+    }
+
+    function withdraw(uint amount) public {
+       require(balance[msg.sender] >= amount, "not enough balance");
+       msg.sender.call.value(amount)("");
+       balance[msg.sender] -= amount;
+    }
+}
+</pre>
+
+<ul>
+
+<li>Create an interface so it's easy to call methods on the SimpleDAO contract. Note: in interfaces you need to change <code>public</code> to <code>external</code></li>
+
+<li>Your attack contract will need to have a fallback method, and probably also another method to trigger the attack.</li>
+
+<li>You can <b>not</b> use a single-use contract for this hack since your contract's fallback function doesn't exist until the constructor returns. But you can still <code>selfdestruct()</code> the contract later if you want.</li>
+
+<li>Be careful not to transfer too much out of the SimpleDAO. If you try to transfer more than its entire balance, your transaction will fail.</li>
+
+<li>For testing, deploy the SimpleDAO contract and deposit some funds. Then, with a separate account, steal the funds deposited by the original user.</li>
+
+</ul>
