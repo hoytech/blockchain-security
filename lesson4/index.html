@@ -145,7 +145,7 @@
 ## What about this?
 
 <pre class="hljs js">
-    uint256 ownerReward;
+    uint256 ownerReward = 1 ether;
 
     function claimOwnerReward(uint256 amount) public onlyOwner {
         require(amount <= ownerReward, "too much");
@@ -163,7 +163,7 @@
 ## Plausible deniability
 
 <pre class="hljs js">
-    uint256 ownerReward;
+    uint256 ownerReward = 1 ether;
 
     function claimOwnerReward(uint256 amount) public onlyOwner {
         require(amount <= ownerReward, "too much");
@@ -193,7 +193,7 @@
 * A contract is an independent entity
   * Has an ETH balance
   * Has code, which cannot be changed
-  * Lives forever (unless they `selfdestruct`)
+  * Lives forever (unless `selfdestruct`)
   * Can send and receive ETH
   * Can call functions in other contracts
   * Can create other contracts
@@ -357,9 +357,9 @@ interface VaultInterface {
 ## Incorrect interfaces
 
 * Check your interfaces carefully: They need to exactly match what the contract specified
-  * Otherwise or you may end up [accidentally calling a fallback function](https://github.com/crytic/not-so-smart-contracts/tree/master/incorrect_interface)
-  * Even writing `int256` instead of `uint256` will fail
-* Exception: change `public` to `external`
+  * Otherwise you may end up [accidentally calling a fallback function](https://github.com/crytic/not-so-smart-contracts/tree/master/incorrect_interface)
+  * Even `int256` instead of `uint256`
+* Exception: you need to change `public` to `external`
 
 </script></section>
 
@@ -491,7 +491,7 @@ contract ConditionalTipper {
 
 ## Detecting contract callers
 
-* Can we detect if the caller is a contract instead of an EOA?
+* Can we detect if the caller is a contract?
 * Attempt 1 (from [Fomo 3D](https://www.reddit.com/r/ethereum/comments/916xni/how_to_pwn_fomo3d_a_beginners_guide/)):
 <pre class="hljs js">
     modifier isHuman() {
