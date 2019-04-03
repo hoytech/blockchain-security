@@ -197,7 +197,7 @@
   * Can send and receive ETH
   * Can call functions in other contracts
   * Can create other contracts
-* This is the main reason Ethereum is interesting
+* *This is the main reason Ethereum is interesting*
 
 </script></section>
 
@@ -352,6 +352,19 @@ interface VaultInterface {
 
 
 
+<section data-markdown><script type="text/template">
+
+## Incorrect interfaces
+
+* Check your interfaces carefully: They need to exactly match what the contract specified
+  * Otherwise or you may end up [accidentally calling a fallback function](https://github.com/crytic/not-so-smart-contracts/tree/master/incorrect_interface)
+  * Even writing `int256` instead of `uint256` will fail
+* Exception: change `public` to `external`
+
+</script></section>
+
+
+
 
 <section data-markdown><script type="text/template">
 
@@ -421,7 +434,7 @@ contract ConditionalTipper {
 
 * Send a tip to a Tipjar (Lab #3), but make sure its balance doesn't exceed some limit amount
 * Could check before sending transaction, but balance might change after that
-  * If somebody else's transaction mined first
+  * If somebody else's transaction is mined first
 
 </script></section>
 
@@ -725,7 +738,7 @@ Suppose it's called like this:
 * As mentioned, `.call` forwards unlimited gas
   * So, if `msg.sender` is a contract, its fallback function can do lots of stuff
   * Including calling `withdraw` *again*
-    * Try to walk through what would happen
+    * Let's walk through what would happen...
 
 </script></section>
 
@@ -837,8 +850,8 @@ Hacker fallback:         <span class="highlightRed">dao.withdraw(10)</span>
 ## Beware optimizations
 
 * [Serious bug](https://medium.com/@richmcateer_93513/compounds-self-liquidation-bug-829d6571c2df) in Compound money market contract
-* Partially caused by minimizing the number of writes to storage as gas optimization
-* Always try to preserve invariants
+* Partially caused by minimizing the number of writes to storage as a gas optimization
+* Always try to preserve invariants in optimized code
 
 </script></section>
 
