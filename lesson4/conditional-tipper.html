@@ -1,0 +1,35 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+li { margin-top: 20px; }
+</style>
+
+<h1>Exercise: Conditional Tipper</h1>
+
+
+<ul>
+
+<li>Maybe there is some crowd-funding goal and lots of people are sending tips to meet it, but you don't want the recipient to get more than they need. Since you don't know when your transaction will get processed, or whose transactions will come ahead of yours, you can't reliably calculate your tip beforehand.</li>
+
+<li>In the <a href="https://remix.ethereum.org">remix IDE</a>, deploy the TipJar contract created in <a href="../lesson3/tipjar.html">a previous lab</a>. Then use the following single-use contract to make sure that your tip doesn't bring the tipjar's balance over some specified amount.
+
+<pre>
+pragma solidity ^0.5.0;
+
+contract ConditionalTipper {
+    constructor(address payable tipjar, uint256 limit)
+                  public payable {
+        if (tipjar.balance < limit) {
+            tipjar.transfer(limit - tipjar.balance);
+        }
+
+        selfdestruct(msg.sender);
+    }
+}
+</pre>
+
+</li>
+
+<li>Note that the constructor is payable, and you need to send some ETH in when you deploy the contract. However, you will get refunded any amount that wasn't sent as a tip.</li>
+
+</ul>

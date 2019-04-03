@@ -115,10 +115,10 @@
 ## Threat models
 
 * Model 1: Contract writer is trusted
-  * Must worry about all bugs we've discussed so far (overflows, visibility, etc)
+  * Must worry about all bugs we've discussed so far (overflows, function visibility, etc)
 * Model 2: Contract writer may be malicious
-  * *Underhanded* contracts
   * Must worry about everything in model 1, as well as possibility contract writer added a hidden back-door
+    * *Underhanded* contracts
 
 </script></section>
 
@@ -158,21 +158,6 @@
 
 
 
-
-
-<section data-markdown><script type="text/template">
-
-## Contract upgrades
-
-* Some contracts are designed so they can be *upgraded*
-  * **Good**: Owner can fix bugs in the contract before bad guys can exploit them
-  * **Bad**: If owner is a bad guy, can add back-doors
-* Because a contract's code cannot be changed, upgradable contracts are implemented using *proxy contracts* (contracts that call other contracts)
-
-</script></section>
-
-
-
 <section data-markdown><script type="text/template">
 
 ## Plausible deniability
@@ -190,8 +175,8 @@
 * Should be `-=`, not `=-`
 * This bug lets owner steal all ETH in contract
   * How?
-* But, if detected, owner can claim:
-  * *Oops sorry. It was just a typo, I wasn't going to steal your money, I promise*
+* If detected beforehand, owner can claim:
+  * *Oops sorry. It was just a typo, I wasn't trying to steal anything, I promise*
 
 </script></section>
 
@@ -205,13 +190,14 @@
 
 ## Autonomous agents
 
-* Contracts are independent entities
-  * They have an ETH balance
-  * They have code, which cannot be changed
-  * They live forever (unless they `selfdestruct`)
-  * They can send and receive ETH
-  * They can call functions in other contracts
-  * They can create other contracts
+* A contract is an independent entity
+  * Has an ETH balance
+  * Has code, which cannot be changed
+  * Lives forever (unless they `selfdestruct`)
+  * Can send and receive ETH
+  * Can call functions in other contracts
+  * Can create other contracts
+* This is the main reason Ethereum is interesting
 
 </script></section>
 
@@ -231,6 +217,18 @@
 </script></section>
 
 
+
+<section data-markdown><script type="text/template">
+
+## Contract upgrades
+
+* Some contracts are designed to be *upgradeable*
+  * **Good**: Owner can fix bugs in the contract before bad guys can exploit them
+  * **Bad**: If owner is a bad guy, can add back-doors
+* Because a contract's code cannot be changed, upgradeable contracts are implemented using *proxy contracts* (contracts that call other contracts)
+  * An upgrade changes the contract address that the proxy will call
+
+</script></section>
 
 
 
@@ -256,10 +254,10 @@
 ## Forwarding gas
 
 * When you call another contract, you can choose how much gas to "forward" to it
-  * Forward just means the amount of your own gas you are allowing it to use
+  * Forward just means the maximum amount of your own gas you are letting it consume
 * `transfer` forwards 2,300 gas
   * Small amount: Just enough for the fallback function to log an event
-  * But not enough to do things like write to storage
+  * Not enough to do things like write to storage
 
 </script></section>
 
@@ -289,7 +287,7 @@
 
 ## Transfer to a contract
 
-* Suppose you need to send two payouts:
+* Suppose your contract sends two payouts:
 <pre class="hljs js">
     addr1.transfer(payout1);
     addr2.transfer(payout2);
@@ -300,7 +298,8 @@
         require(false);
     }
 </pre>
-* `addr2` causes whole transaction to fail, including payout to `addr1` (see [King of the Ether bug](https://www.kingoftheether.com/postmortem.html))
+* So, `addr2` causes whole transaction to fail, including payout to `addr1`
+  * Real-life example: [King of the Ether bug](https://www.kingoftheether.com/postmortem.html)
 
 </script></section>
 
@@ -310,12 +309,12 @@
 
 ## Withdrawal pattern
 
-* It is better to record how much each address is owed:
+* It is better to record how much is owed to each address:
 <pre class="hljs js">
     owed[addr1] += payout1;
     owed[addr2] += payout2;
 </pre>
-* And then allow each address to claim their payouts separately:
+* Then let each address withdraw their payouts in separate transactions:
 <pre class="hljs js">
     function withdraw() public {
         uint256 amount = owed[msg.sender];
@@ -361,6 +360,7 @@ interface VaultInterface {
 <pre class="hljs js">
 contract SingleUseContract {
     constructor() public payable {
+
         // do operations
 
         <span class="highlight">selfdestruct(msg.sender);</span>
@@ -369,7 +369,8 @@ contract SingleUseContract {
 </pre>
 
 * Perform operations in a contract's constructor, and then `selfdestruct` when finished
-  * One of the few valid use cases for `selfdestruct`
+  * One of the few valid use cases for `selfdestruct`: gas refund for single-use contracts
+* Like a "throw-away account"
 
 </script></section>
 
@@ -383,8 +384,8 @@ contract SingleUseContract {
 <pre class="hljs js">
 contract BankFundsMover {
     constructor(BankInterface bank1, BankInterface bank2) public {  
-        bank1.withdraw();
-        bank2.deposit();
+        bank1.withdraw(1 ether);
+        bank2.deposit.value(1 ether)();
 
         selfdestruct(msg.sender);
     }
@@ -392,8 +393,9 @@ contract BankFundsMover {
 </pre>
 
 * Either **both** the withdrawal and deposit will happen, or **neither** will
+  * Actions execute as an **atomic unit**
 * No other transaction can sneak in between the withdrawal and deposit
-* They happen as an **atomic unit**
+  * Funds will never be outside a bank
 
 </script></section>
 
@@ -406,10 +408,10 @@ contract BankFundsMover {
 
 <pre class="hljs js">
 contract ConditionalTipper {
-    constructor(TipJarInterface tipjar, address preferredOwner)
+    constructor(address payable tipjar, uint256 limit)
                   public payable {
-        if (tipjar.owner == preferredOwner) {
-            tipjar.transfer(msg.value);
+        if (tipjar.balance < limit) {
+            tipjar.transfer(limit - tipjar.balance);
         }
 
         selfdestruct(msg.sender);
@@ -417,8 +419,9 @@ contract ConditionalTipper {
 }
 </pre>
 
-* You want to send a tip to a Tipjar (Lab #3), but only if the owner is a particular address
-* You could check before you send transaction, but owner might change between when you create transaction and when it is mined
+* Send a tip to a Tipjar (Lab #3), but make sure its balance doesn't exceed some limit amount
+* Could check before sending transaction, but balance might change after that
+  * If somebody else's transaction mined first
 
 </script></section>
 
@@ -444,9 +447,27 @@ contract ConditionalTipper {
 
 
 
+
+
+
 <section data-markdown><script type="text/template">
 
-## On-chain randomness
+## Beating the house
+
+* Many dApps that depend on randomness have [been found vulnerable](https://blog.positive.com/predicting-random-numbers-in-ethereum-smart-contracts-e5358c6b8620)
+* How about the Coin Flip Game contracts we implemented in the previous lab?
+  * Consider what is possible with a single-use contract
+    * Note that conditions can be checked after calling a contract, and can optionally revert the entire transaction
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Lab 5
+
+[hack-coinflipgame.html](hack-coinflipgame.html)
 
 </script></section>
 
@@ -497,6 +518,20 @@ contract ConditionalTipper {
 
 
 
+
+
+<section data-markdown><script type="text/template">
+
+## On-chain randomness
+
+* Blockchains are global, deterministic data-structures
+* Generating something unpredictable is impossible
+  * Everybody needs to generate the same value
+
+</script></section>
+
+
+
 <section data-markdown><script type="text/template">
 
 ## Miner attacks
@@ -514,8 +549,8 @@ contract ConditionalTipper {
 
 ## Commitment schemes
 
-* Cryptographic protocol for 2 or more parties to come to a consensus on a random value
-* Commonly known as commit-reveal
+* There *is* a way to create secure randomness on-chain: *commit-reveal*
+  * Cryptographic protocol for 2 or more parties to come to a consensus on a value they all can agree is random
 
 </script></section>
 
@@ -525,10 +560,10 @@ contract ConditionalTipper {
 
 ## Commit phase
 
-* Two parties: A, B
+* Assume two parties: A, B
 * Each generates a secret random value: r<sub>A</sub>, r<sub>B</sub>
 * Each publishes a hash of their secret: H(r<sub>A</sub>), H(r<sub>B</sub>)
-* Once the hashes have been downloaded, commit phase ends and reveal phase begins...
+* After the hashes have been exchanged, commit phase ends and reveal phase begins...
 
 </script></section>
 
@@ -539,7 +574,7 @@ contract ConditionalTipper {
 ## Reveal phase
 
 * Each reveals their random values: r<sub>A</sub>, r<sub>B</sub>
-* Each computes the hash of the other's secret value: H(r<sub>A</sub>), H(r<sub>B</sub>)
+* Each computes the hash of the other's secret value: H(r<sub>B</sub>), H(r<sub>A</sub>)
 * Each verifies that the value the other published in the commit phase matches what they computed
 * Combine r<sub>A</sub> and r<sub>B</sub> to create the random value
   * Ways to combine: xor, `+`, `H(A . B)`
@@ -548,15 +583,43 @@ contract ConditionalTipper {
 
 
 
+<section data-markdown><script type="text/template">
+
+## Commit-reveal security
+
+* This works because the randomness depends on both r<sub>A</sub> and r<sub>B</sub>
+* Each party needs to commit to their random number before they can see the other random numbers
+* As long as there is sufficient block-time between the commit and reveal phases, miners have no influence
+
+</script></section>
+
+
 
 
 <section data-markdown><script type="text/template">
 
-## Lab 5
+## Failure to reveal
 
-[hack-coinflipgame.html](hack-coinflipgame.html)
+* During the reveal phase, one party will see the other revealed numbers first
+* If this party's outcome is bad, they could choose to not reveal their secret number
+  * The punishment for failing to reveal should be at least as bad as a losing outcome
 
 </script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Copied commitment
+
+* During the commit phase, one party could submit *the same hash* as the other party
+  * Depending on the combination, output may be predictable
+    * $r \oplus r = 0$
+    * $r + r \bmod 2 = 0$
+  * Prevent copied commitments in the protocol
+
+</script></section>
+
+
 
 
 
@@ -740,7 +803,7 @@ What if called like so:
 pragma solidity ^0.5.0;
 
 contract SimpleDAO {
-    mapping (address => uint) public balance;
+    mapping(address => uint) public balance;
   
     function deposit() public payable {
         balance[msg.sender] += msg.value;

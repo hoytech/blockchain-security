@@ -1,0 +1,25 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+li { margin-top: 20px; }
+</style>
+
+<h1>Lab 5: Hack Coin Flip Game</h1>
+
+<div>Write a single-use solidity contract to steal funds from the <code>CoinFlipGame</code> contract you made in <a href="../lesson3/coinflipgame.html">the previous lab</a>. Your submission should be the solidity program.</div>
+
+<ul>
+
+<li>
+There are several ways to do this. Note that a single-use contract can check conditions before and/or after it calls another contract. Also, understand that your single-use transaction is executing in the exact same block (in fact the same transaction) as the calls it makes to other contracts.
+</li>
+
+<li>
+Since the maximum bet size is 1/10th the contract balance, you can never fully empty it. Try to make your hack take as much as it can using the fewest transactions possible.
+</li>
+
+<li>
+Bonus: How many wins of maximum bet size does it take to get 90% of the balance? How about X%?
+</li>
+
+</ul>
