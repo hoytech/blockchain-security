@@ -106,7 +106,7 @@
 ## Lesson Topics
 
 * Input handling
-* Off-chain designs
+* On-chain/off-chain
 
 </script></section>
 
@@ -282,6 +282,87 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
 <section data-markdown><script type="text/template">
 
 ## 15 minute break
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Front-running
+
+* Before transactions are added to the blockchain, they are shared with all the nodes in the network
+  * They sit in a "mempool" waiting to be mined
+  * Everyone can see them
+* If the transactions contain valuable information, they can be used to create new transactions
+  * Can ensure they are mined before the original transactions by setting high gas price
+  * Miners choose highest gas price transactions when making blocks
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Bounty contract
+
+<pre class="hljs js" style="font-size: 45%">
+contract SecretBounty {
+    constructor() public payable {
+    }
+
+    function claimBounty(bytes32 guess) public {
+        require(keccak256(guess) ==
+                0xcb1ca958767e47516505bf9545b02d4f253764255410671dd9ffcd6c8f19984c,
+                "bad guess");
+
+        msg.sender.transfer(address(this).balance);
+    }
+}
+</pre>
+
+* Suppose this contract was loaded with 1000 ETH
+* If you called `claimBounty` with the correct solution, somebody would probably front-run you with higher gas price
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Front-running solutions
+
+* Impossible to solve completely
+* Similar to randomness, most solutions use a commitment scheme
+  * `SecretBounty` could be fairer if it let you commit to a hash of the guess and a salt
+  * Later (say 100 blocks) you would reveal your guess and salt
+    * But check that nobody front-ran your commitment before you reveal!
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Off-chain designs
+
+* Sending a transaction to the blockchain results in an update to the blockchain state
+  * This is called an *on-chain* operation
+* To avoid paying gas, and/or to increase speed, dapps try to do various things without transactions
+  * These are called *off-chain* techniques
+
+</script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Off-chain orderbooks
+
+* In token (and other) exchanges, orders are offers to trade at a certain price
+* Usually there are many more orders than trades
 
 </script></section>
 
