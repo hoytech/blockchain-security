@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Introduction to Blockchain Security Practices</title>
+
+    <meta name="author" content="Doug Hoyte">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="../reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="../reveal.js/css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="../reveal.js/lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? '../reveal.js/css/print/pdf.css' : '../reveal.js/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="../reveal.js/lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <style>
+      .reveal .slides h1, .reveal .slides h2, .reveal .slides h3 {
+        text-transform: none;
+      }
+
+      .two-column {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .two-column em {
+        margin: 20px;
+      }
+
+      .reveal .big-and-bold {
+        font-weight: bold;
+        font-size: 135%;
+      }
+
+      .reveal .shrunk-a-bit {
+        font-size: 90%;
+      }
+
+      .reveal .shrunk-a-bit pre {
+        width: 100%;
+      }
+
+      .reveal pre {
+        width: 100%;
+      }
+
+      .reveal .highlight {
+        color: yellow;
+        font-weight: bold;
+      }
+
+      .reveal .highlightRed {
+        color: red;
+        font-weight: bold;
+      }
+
+      .reveal .highlightGreen {
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+<!------------------------------------------------------->
+
+
+
+<section data-markdown><script type="text/template">
+
+## Introduction to Blockchain Security Practices
+
+### Lesson 5: Full Stack Security
+
+*Doug Hoyte, March 2019*
+
+[https://is.gd/blockchainsec](https://is.gd/blockchainsec)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Lesson Topics
+
+* Input handling
+* Off-chain designs
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Web security
+
+* dApps are usually websites
+* Almost all the regular web security practices apply
+  * Except user authentication is different
+    * Handling cookies/passwords unnecessary
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Cross-site scripting
+
+* One of the most common web security bugs
+* When an attacker's javascript code is run in a user's browser
+* Etherdelta users [lost thousands of dollars](https://hackernoon.com/how-one-hacker-stole-thousands-of-dollars-worth-of-cryptocurrency-with-a-classic-code-injection-a3aba5d2bff0) because of an XSS bug
+  * Users could submit tokens for listing on the site
+  * Token name wasn't sanitized
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Demo
+
+[xss.html](xss.html)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## XSS protections
+
+* Always HTML escape user-supplied content before putting it into an HTML page, or DOM element
+  * `<` becomes `&lt;`
+* Use frameworks like React that provide XSS protection by default
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## SQL injection
+
+* When attacker is able to run SQL statements on your DB because of improper input handling
+<pre class="hljs js">
+db.get('SELECT * FROM users WHERE userId = ' + req.params.userId);
+</pre>
+What if user passes in the following as a userId:
+<pre class="hljs js">
+1; DROP TABLE users
+</pre>
+Then the DB will execute:
+<pre class="hljs js">
+SELECT * FROM users WHERE userId = 1; DROP TABLE users
+</pre>
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## SQL injection protection
+
+* Use prepared statements:
+<pre class="hljs js">
+db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
+</pre>
+* Note that this bug is similar to XSS
+  * User input was trusted to be valid and then used in a dangerous way
+
+</script></section>
+
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Short address attack
+
+* Specific to blockchain apps
+  * But same root cause: trusting user input
+* Ethereum addresses are supposed to be 20 bytes (40 hex chars)
+* But if user passed in shorter address, some exchanges mishandled them
+  * [Exchange constructed ethereum input data manually](https://vessenes.com/the-erc20-short-address-attack-explained/)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Short address example
+
+* Support an exchange wants to send `0x1234` tokens to a user's address
+* User passes in valid address (all As)
+<pre>
+<span class="highlightGreen">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span>
+<span class="highlight">0000000000000000000000000000000000000000000000000000000000001234</span>
+</pre>
+* Exchange concantenated the above fields and sent to a contract as input data
+  * For example to `transfer` method on ERC20 token
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Short address example (2)
+
+* User passes in short address (19 bytes)
+<pre>
+<span class="highlightGreen">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span><span class="highlight">00</span>
+<span class="highlight">00000000000000000000000000000000000000000000000000000000001234</span><span class="highlightRed">00</span>
+</pre>
+* Attacker has to generate address ending in `00`
+  * Use [your vanity address generator](../lesson1/vanity-address.html)
+* Ending `00` is added by ABI decoder in contract
+  * Tricks exchange into sending `0x123400` tokens instead of `0x1234`
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Gas siphoning
+
+* [Some exchanges set a very high gas limit when sending withdrawals](https://drive.google.com/file/d/1mULop1LxHJJy_uzVBdc_xFItN9ck04Jj/view)
+* So you could request a withdrawal to your contract with a fallback function
+<pre class="hljs js">
+  function() external payable {
+      doSomeExpensiveWork();
+  }
+</pre>
+* The exchange would pay for your expensive work, like mining [gas token](https://gastoken.io/)
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Be careful with input data
+
+* The root cause of all the bugs we've seen is unexpected input data
+* **Trust nothing** that comes from users
+  * They may send stuff you aren't expecting
+* **Sanitize** user data when you receive it
+  * Make sure it only has expected characters, is right length, etc
+* **Escape** user data when you use it
+  * Be careful of the context you use the user data, in case it is misinterpreted
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## 15 minute break
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## End of lesson
+
+</script></section>
+
+
+
+<!------------------------------------------------------->
+
+
+      </div>
+
+    </div>
+
+    <script src="../reveal.js/lib/js/head.min.js"></script>
+    <script src="../reveal.js/js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'none', // none/fade/slide/convex/concave/zoom
+
+	math: {
+          mathjax: '../lib/MathJax/MathJax.js',
+          config: 'TeX-AMS_SVG-full',
+	},
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '../reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: '../reveal.js/plugin/math/math.js', async: true },
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

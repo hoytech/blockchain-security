@@ -1,0 +1,24 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+li { margin-top: 20px; }
+</style>
+
+<h1>Demo: Cross-site scripting</h1>
+
+<div>Welcome to the Awesome Token Exchange</div>
+
+<div id="hello">
+
+<div>Please enter the token you would like to list.</div>
+
+<input id="myToken" placeholder="token name" />
+<button onclick="entered()">Submit</button>
+</div>
+
+<script>
+function entered() {
+    var name = document.getElementById("myToken").value;
+    document.getElementById("hello").innerHTML = "Listing for token '" + name + "' accepted.";
+}
+</script>
