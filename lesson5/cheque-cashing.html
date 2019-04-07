@@ -1,0 +1,106 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+li { margin-top: 20px; }
+</style>
+
+<h1>Lab 6: Cheque Cashing</h1>
+
+<div>Modify the following personal bank contract and signing program to make them secure against replay and cross-contract spend attacks. Your submission should be the solidity program AND the signing program.</div>
+
+<hr/>
+
+<div>
+<h3>PersonalBank.sol</h3>
+<pre>
+pragma solidity ^0.5.0;
+
+contract PersonalBank {
+    address owner;
+    
+    constructor() public payable {
+        owner = msg.sender;
+    }
+    
+    function() external payable {
+    }
+    
+    function cashCheque(address payable to, uint256 amount,
+                        bytes32 r, bytes32 s, uint8 v)
+                public {
+        bytes32 messageHash = keccak256(abi.encodePacked(to, amount));
+        
+        bytes32 messageHash2 = keccak256(abi.encodePacked(
+            "\x19Ethereum Signed Message:\n32", messageHash
+        ));
+        
+        require(ecrecover(messageHash2, v, r, s) == owner, "bad signature");
+        
+        to.transfer(amount);
+    }
+}
+</pre>
+</div>
+
+<hr/>
+
+<div>
+<h3>sign-cheque.js</h3>
+<pre>
+const ethers = require('ethers');
+
+let privateKey = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d';
+
+
+// Cheque parameters
+
+let to = '0xffcf8fdee72ac11b5c542428b35eef5769c409f0';
+let amount = '1.0';
+
+
+async function signPayment() {
+    let wallet = new ethers.Wallet(privateKey);
+    let amountWei = ethers.utils.parseEther(amount);
+
+    let message = ethers.utils.concat([
+                      ethers.utils.hexZeroPad(to, 20),
+                      ethers.utils.hexZeroPad(ethers.utils.hexlify(amountWei), 32),
+                  ]);
+
+    let messageHash = ethers.utils.keccak256(message);
+
+    let sig = await wallet.signMessage(ethers.utils.arrayify(messageHash));
+    let splitSig = ethers.utils.splitSignature(sig);
+
+    console.log(`to: ${to}`);
+    console.log(`amount: ${amountWei}`);
+    console.log();
+    console.log(`r: ${splitSig.r}`);
+    console.log(`s: ${splitSig.s}`);
+    console.log(`v: ${splitSig.v}`);
+}
+
+signPayment();
+</pre>
+</div>
+
+<hr/>
+
+
+<ul>
+
+<li>This contract is a "Personal Bank". You can deploy it and deposit funds, either in the constructor or at any time by sending to the fallback. When you want to transfer some funds to another person, you write a <i>cheque</i>. This is a signed message that can be used to claim the funds ("cash the cheque"). The message is then sent to the recipient off-chain. So, writing a cheque costs you no gas fees. The person who cashes the cheque pays the gas.</li>
+
+<li>
+However, there are 2 security problems with this system as written:
+  <ul>
+    <li><b>Replay attacks</b>: A user could cash a cheque multiple times and therefore receive more ETH than intended.</li>
+    <li><b>Cross-contract spends</b>: If there are multiple banks using the same protocol, then a cheque meant for one bank could be used on any or all of the other banks, which was probably not intended.</li>
+  </ul>
+</li>
+
+<li>You will have to test this with ganache-cli (as in <a href="../lesson2/creating-transactions.html">Lab 2</a>) since remix doesn't provide access to the account private keys, which are needed for signing.</li>
+
+<li><b>NOTE:</b> When testing, make sure you have ganache-cli v6.4.2 or higher, this version contains an important bug-fix needed for this lab. If you are seeing "out of gas" error, try upgrading ganache-cli.</li>
+
+</ul>

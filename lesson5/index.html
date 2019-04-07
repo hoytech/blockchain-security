@@ -126,7 +126,7 @@
 
 <section data-markdown><script type="text/template">
 
-## Cross-site scripting
+## Cross-site scripting (XSS)
 
 * One of the most common web security bugs
 * When an attacker's javascript code is run in a user's browser
@@ -166,7 +166,7 @@
 
 * When attacker is able to run SQL statements on your DB because of improper input handling
 <pre class="hljs js">
-db.get('SELECT * FROM users WHERE userId = ' + req.params.userId);
+db.get('SELECT \* FROM users WHERE userId = ' + req.params.userId);
 </pre>
 What if user passes in the following as a userId:
 <pre class="hljs js">
@@ -174,8 +174,9 @@ What if user passes in the following as a userId:
 </pre>
 Then the DB will execute:
 <pre class="hljs js">
-SELECT * FROM users WHERE userId = 1; DROP TABLE users
+SELECT \* FROM users WHERE userId = 1; DROP TABLE users
 </pre>
+  * Good-bye users table
 
 </script></section>
 
@@ -184,7 +185,7 @@ SELECT * FROM users WHERE userId = 1; DROP TABLE users
 
 ## SQL injection protection
 
-* Use prepared statements:
+* Instead, use prepared statements:
 <pre class="hljs js">
 db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
 </pre>
@@ -205,7 +206,7 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
   * But same root cause: trusting user input
 * Ethereum addresses are supposed to be 20 bytes (40 hex chars)
 * But if user passed in shorter address, some exchanges mishandled them
-  * [Exchange constructed ethereum input data manually](https://vessenes.com/the-erc20-short-address-attack-explained/)
+  * [Some exchanges constructed ethereum input data manually](https://vessenes.com/the-erc20-short-address-attack-explained/)
 
 </script></section>
 
@@ -215,14 +216,13 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
 
 ## Short address example
 
-* Support an exchange wants to send `0x1234` tokens to a user's address
-* User passes in valid address (all As)
+* Suppose an exchange wants to send `0x1234` tokens to a user's address (shown as As)
+* Exchange concantenates the fields and sends to a contract as input data
+  * For example to `transfer()` method on ERC20 token
 <pre>
 <span class="highlightGreen">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span>
 <span class="highlight">0000000000000000000000000000000000000000000000000000000000001234</span>
 </pre>
-* Exchange concantenated the above fields and sent to a contract as input data
-  * For example to `transfer` method on ERC20 token
 
 </script></section>
 
@@ -232,14 +232,14 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
 
 ## Short address example (2)
 
-* User passes in short address (19 bytes)
+* If user passes in short address (19 bytes):
 <pre>
 <span class="highlightGreen">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span><span class="highlight">00</span>
 <span class="highlight">00000000000000000000000000000000000000000000000000000000001234</span><span class="highlightRed">00</span>
 </pre>
-* Attacker has to generate address ending in `00`
-  * Use [your vanity address generator](../lesson1/vanity-address.html)
-* Ending `00` is added by ABI decoder in contract
+* Attacker has to generate an address ending in `00`
+  * Could use [your vanity address generator](../lesson1/vanity-address.html)
+* Final <span class="highlightRed"><code>00</code></span> is added by ABI decoder in contract
   * Tricks exchange into sending `0x123400` tokens instead of `0x1234`
 
 </script></section>
@@ -258,7 +258,7 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
       doSomeExpensiveWork();
   }
 </pre>
-* The exchange would pay for your expensive work, like mining [gas token](https://gastoken.io/)
+* The exchange would pay for your expensive work, like mining [gas tokens](https://gastoken.io/)
 
 </script></section>
 
@@ -267,7 +267,7 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
 
 ## Be careful with input data
 
-* The root cause of all the bugs we've seen is unexpected input data
+* The root cause of all these bugs is mishandling of input data
 * **Trust nothing** that comes from users
   * They may send stuff you aren't expecting
 * **Sanitize** user data when you receive it
@@ -293,10 +293,10 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
 
 * Before transactions are added to the blockchain, they are shared with all the nodes in the network
   * They sit in a "mempool" waiting to be mined
-  * Everyone can see them
+    * Everyone can see them
 * If the transactions contain valuable information, they can be used to create new transactions
   * Can ensure they are mined before the original transactions by setting high gas price
-  * Miners choose highest gas price transactions when making blocks
+    * Miners choose highest gas price transactions when making blocks
 
 </script></section>
 
@@ -321,7 +321,7 @@ contract SecretBounty {
 </pre>
 
 * Suppose this contract was loaded with 1000 ETH
-* If you called `claimBounty` with the correct solution, somebody would probably front-run you with higher gas price
+* If you called `claimBounty` with the correct solution, somebody would probably front-run you with a higher gas price
 
 </script></section>
 
@@ -333,9 +333,9 @@ contract SecretBounty {
 
 * Impossible to solve completely
 * Similar to randomness, most solutions use a commitment scheme
-  * `SecretBounty` could be fairer if it let you commit to a hash of the guess and a salt
-  * Later (say 100 blocks) you would reveal your guess and salt
-    * But check that nobody front-ran your commitment before you reveal!
+  * `SecretBounty` could be fairer if it let you commit to a hash of the guess, your address, and a random number
+  * Later (say 100 blocks) you would reveal your guess and random number
+  * Smart contract would check commitment
 
 </script></section>
 
@@ -349,10 +349,9 @@ contract SecretBounty {
 * Sending a transaction to the blockchain results in an update to the blockchain state
   * This is called an *on-chain* operation
 * To avoid paying gas, and/or to increase speed, dapps try to do various things without transactions
-  * These are called *off-chain* techniques
+  * *Off-chain*
 
 </script></section>
-
 
 
 
@@ -362,9 +361,93 @@ contract SecretBounty {
 ## Off-chain orderbooks
 
 * In token (and other) exchanges, orders are offers to trade at a certain price
-* Usually there are many more orders than trades
+* Orders are distributed off-chain
+* When somebody wants to trade on an order, they submit it to the block-chain
+  * Not every order will be traded, so better to keep them off-chain if possible
 
 </script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Signatures
+
+* In order to create off-chain messages that can be proved to come from you, your ethereum private key can be used to sign messages
+* A smart contract can verify the signatures on-chain using `ecrecover()`
+  * This is the same functionality that verifies ethereum transactions
+* Only small messages can be signed
+  * Longer messages are hashed and the hash is signed
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## ecrecover
+
+<pre class="hljs js">
+ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s)
+    returns(address)
+</pre>
+
+* *hash*: This is the hash of the message to sign
+* *v*, *r*, *s*: These 3 values are the signature
+* It returns an ethereum address
+  * This is the address of who signed the message
+  * This is why you don't need to pass in a public key: It is "recovered" from the signature
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## \x19... prefix
+
+<pre class="hljs js">
+bytes32 messageHash2 = keccak256(abi.encodePacked(
+    "\x19Ethereum Signed Message:\n32", messageHash
+));
+</pre>
+
+* Most signers will automatically prepend a special prefix to the beginning of your message and then hash
+* This is so that users can't be tricked into signing something that could be a valid ethereum transaction
+  * Bitcoin [has a similar protection](https://bitcoin.stackexchange.com/questions/77324/how-are-bitcoin-signed-messages-generated)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Signature malleability
+
+* ECDSA is not secure under [EUF model](https://en.wikipedia.org/wiki/Digital_signature_forgery)
+* This means that anyone who has a valid signature can compute another valid signature: 
+<pre class="hljs js" style="font-size: 50%">
+r' = r
+s' = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141 - s
+v' = 0x37 - v
+</pre>
+* Ethereum (and bitcoin) prohibit this for transaction signatures
+  * But `ecrecover` still allows it so don't use signatures to prevent replay attacks
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Lab 6: Cheque cashing
+
+[cheque-cashing.html](cheque-cashing.html)
+
+</script></section>
+
+
 
 
 
