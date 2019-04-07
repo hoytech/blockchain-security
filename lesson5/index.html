@@ -187,7 +187,7 @@ SELECT \* FROM users WHERE userId = 1; DROP TABLE users
 
 * Instead, use prepared statements:
 <pre class="hljs js">
-db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
+db.get('SELECT \* FROM users WHERE userId = ?', req.params.userId);
 </pre>
 * Note that this bug is similar to XSS
   * User input was trusted to be valid and then used in a dangerous way
@@ -217,8 +217,8 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
 ## Short address example
 
 * Suppose an exchange wants to send `0x1234` tokens to a user's address (shown as As)
+* For example using `transfer()` method on ERC20 token
 * Exchange concantenates the fields and sends to a contract as input data
-  * For example to `transfer()` method on ERC20 token
 <pre>
 <span class="highlightGreen">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span>
 <span class="highlight">0000000000000000000000000000000000000000000000000000000000001234</span>
@@ -321,7 +321,7 @@ contract SecretBounty {
 </pre>
 
 * Suppose this contract was loaded with 1000 ETH
-* If you called `claimBounty` with the correct solution, somebody would probably front-run you with a higher gas price
+* If you called `claimBounty` with the correct solution, somebody would probably copy your guess and front-run you with a higher gas price
 
 </script></section>
 
@@ -332,7 +332,7 @@ contract SecretBounty {
 ## Front-running solutions
 
 * Impossible to solve completely
-* Similar to randomness, most solutions use a commitment scheme
+* Similar to on-chain randomness, most solutions use a commitment scheme
   * `SecretBounty` could be fairer if it let you commit to a hash of the guess, your address, and a random number
   * Later (say 100 blocks) you would reveal your guess and random number
   * Smart contract would check commitment
@@ -349,7 +349,7 @@ contract SecretBounty {
 * Sending a transaction to the blockchain results in an update to the blockchain state
   * This is called an *on-chain* operation
 * To avoid paying gas, and/or to increase speed, dapps try to do various things without transactions
-  * *Off-chain*
+  * This is known as *off-chain* communication
 
 </script></section>
 
@@ -360,10 +360,10 @@ contract SecretBounty {
 
 ## Off-chain orderbooks
 
-* In token (and other) exchanges, orders are offers to trade at a certain price
-* Orders are distributed off-chain
+* In token exchanges, orders are offers to trade at a certain price
+* Orders are usually distributed off-chain
 * When somebody wants to trade on an order, they submit it to the block-chain
-  * Not every order will be traded, so better to keep them off-chain if possible
+  * Not every order will be traded on, so better to keep them off-chain to save gas
 
 </script></section>
 
@@ -373,7 +373,7 @@ contract SecretBounty {
 
 ## Signatures
 
-* In order to create off-chain messages that can be proved to come from you, your ethereum private key can be used to sign messages
+* In order to create off-chain messages that can be proved to have come from you, your ethereum private key can be used to sign messages
 * A smart contract can verify the signatures on-chain using `ecrecover()`
   * This is the same functionality that verifies ethereum transactions
 * Only small messages can be signed
@@ -393,11 +393,12 @@ ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s)
     returns(address)
 </pre>
 
-* *hash*: This is the hash of the message to sign
+* *hash*: Hash of the message that was signed
 * *v*, *r*, *s*: These 3 values are the signature
-* It returns an ethereum address
+* Returns an ethereum address
   * This is the address of who signed the message
-  * This is why you don't need to pass in a public key: It is "recovered" from the signature
+  * This is why you don't need to pass in a public key
+    * It is "recovered" from the signature
 
 </script></section>
 
