@@ -187,7 +187,7 @@ SELECT \* FROM users WHERE userId = 1; DROP TABLE users
 
 * Instead, use prepared statements:
 <pre class="hljs js">
-db.get('SELECT \* FROM users WHERE userId = ?', req.params.userId);
+db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
 </pre>
 * Note that this bug is similar to XSS
   * User input was trusted to be valid and then used in a dangerous way
@@ -415,7 +415,7 @@ bytes32 messageHash2 = keccak256(abi.encodePacked(
 </pre>
 
 * Most signers will automatically prepend a special prefix to the beginning of your message and then hash
-* This is so that users can't be tricked into signing something that could be a valid ethereum transaction
+* This is so that users can't be tricked into signing something that could be a valid transaction
   * Bitcoin [has a similar protection](https://bitcoin.stackexchange.com/questions/77324/how-are-bitcoin-signed-messages-generated)
 
 </script></section>
@@ -426,15 +426,15 @@ bytes32 messageHash2 = keccak256(abi.encodePacked(
 
 ## Signature malleability
 
-* ECDSA is not secure under [EUF model](https://en.wikipedia.org/wiki/Digital_signature_forgery)
-* This means that anyone who has a valid signature can compute another valid signature: 
+* ECDSA is not 100% secure under [EUF model](https://en.wikipedia.org/wiki/Digital_signature_forgery)
+* Anyone who has a valid signature can compute another valid signature for same message:
 <pre class="hljs js" style="font-size: 50%">
 r' = r
 s' = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141 - s
 v' = 0x37 - v
 </pre>
-* Ethereum (and bitcoin) prohibit this for transaction signatures
-  * But `ecrecover` still allows it so don't use signatures to prevent replay attacks
+* Ethereum (and bitcoin) protect against this for transaction signatures
+  * But `ecrecover` doesn't so don't use signatures to prevent replay attacks
 
 </script></section>
 
