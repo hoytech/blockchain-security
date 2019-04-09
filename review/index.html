@@ -105,7 +105,8 @@
 
 ## Randomness
 
-* Without randomness, cryptography is impossible
+* Without randomness, cryptography would be impossible
+* Random means unpredictable
   * We need unpredictability for secret keys, and more
 
 </script></section>
@@ -115,11 +116,12 @@
 
 ## Generators
 
-* True Random Number Generators (RNGs) use things like thermal noise
+* True Random Number Generators (RNGs)
+  * Thermal noise, wiggling mouse
 * Psuedo-RNGs (PRNGs)
-  * Start with a seed and return a deterministic stream of values
+  * Start with a seed and return a deterministic sequence of values
 * Cryptographically-Secure-PRNGs
-  * Can't predict future or past values without knowing the seed
+  * Can't predict future values without knowing the seed
 
 </script></section>
 
@@ -146,7 +148,6 @@
 * We make the numbers so big it would take forever to try them all
   * 2<sup>92</sup> atoms in the average human body
   * 2<sup>170</sup> atoms in the planet
-  * 2<sup>190</sup> atoms in the sun
   * 2<sup>233</sup> atoms in the galaxy
   * 2<sup>256</sup> number of bitcoin private keys (approx)
 
@@ -163,6 +164,7 @@
     * But make sure your pre-image domain is large!
 * Collision resistance
   * Hard to find any two messages that hash to same value
+    * But easier than finding a pre-image (birthday problem)
 
 </script></section>
 
@@ -207,7 +209,7 @@
 
 ## Consensus
 
-* Point of a blockchain is to have a global database
+* The point of a blockchain is to have a global database
   * Everyone agrees on the same content
 * All changes have to be deterministic
 
@@ -222,8 +224,8 @@
 * Updates to the DB are called transactions
   * Need to prevent replay attacks (where same transaction used multiple times)
   * Bitcoin uses Unspent Transaction Output (UTXO) model
-  * Ethereum uses Account and nonce model (really a sequence IDs)
-    * <span class="highlightGreen">N</span><span class="highlight">once</span> is a <span class="highlightGreen">N</span>umber only used <span class="highlight">once</span>
+  * Ethereum uses Account and nonce model (really a sequence ID)
+    * <span class="highlight">N</span><span class="highlight">once</span> is a <span class="highlight">N</span>umber only used <span class="highlight">once</span>
 
 </script></section>
 
@@ -254,6 +256,7 @@
 * Your transaction uses a certain amount of gas when it runs
 * You are charged gas used times gas price
 * If you run out of gas, your whole transaction is rolled back
+  * But you still pay the gas fee
 
 </script></section>
 
@@ -293,7 +296,8 @@
 
 * Nodes are programs that implement the blockchain network
   * Pass transactions and blocks between eachother
-  * Used to manage private keys, but modern designs use separate wallets
+  * In the past, managed private keys
+    * Modern designs use separate wallets
   * Usually expose JSON-RPC interface for dApps and wallets to use
 
 </script></section>
@@ -328,8 +332,10 @@
 
 * Contracts contain functions
   * Params with types and names, ie: `uint256 id`
-  * Access restrictions control who can call them: public, private, external, internal
-  * Storage resitrictions control what the function can do: pure, view, (none)
+  * Access restrictions control who can call them:
+    * public, private, external, internal
+  * Storage resitrictions control what the function can do:
+    * pure, view, (none)
 
 </script></section>
 
@@ -339,6 +345,19 @@
 ## Overflows
 
 <img src="../lesson3/rollover.jpg" />
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## Overflow
+
+* In ethereum, numbers will silently wrap around
+  * Signed numbers are twos-complement
+* Multiplication and subtraction can also over/under-flow
+* SafeMath library
+  * `safeAdd(a, b)` throws error if sum can't fit in `uint256`
 
 </script></section>
 
@@ -363,8 +382,9 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 * Contracts have a memory called storage
 * Persists (stays around) between transactions
-* Nothing in storage is private -- nodes can always read it
-* Only if a transaction succeeds are all the changes written
+* Nothing in storage is private
+  * Nodes can always read it
+* Only if a transaction succeeds are all the changes written to storage
 * Writing to storage is expensive (uses lots of gas)
 
 </script></section>
@@ -374,7 +394,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 ## Access control
 
-* `msg.sender` is who called the function
+* `msg.sender` is address that called the function
 * Contracts can have `constructor` which is code run when the contract is created
   * Often `msg.sender` is saved as the "owner" of the contract
 * Modifiers like `onlyOwner` can protect who can call a function
@@ -386,9 +406,10 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 ## Value transfer
 
-* All value transfers are transactions
-  * Functions that receive value should be marked `payable`
-  * If not calling any function, runs the fallback function
+* All ETH value transfers are transactions
+  * Functions that receive value must be marked `payable`
+  * All transactions to contracts run code
+    * If function not found, or no function name given, runs the fallback function
 
 </script></section>
 
@@ -400,7 +421,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 * `mapping` creates a key-value lookup table
 * Arrays are sequentially indexed
   * Try to use mappings instead of arrays if possible
-* `struct`s group together other types into a new type
+* `struct`s group together other types into a new, composite type
 
 </script></section>
 
@@ -412,6 +433,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 * If contract writer is trusted, you only need to worry about accidental bugs
 * If contract writer not trusted, you also need to worry about hidden backdoors
   * **Plausible deniability** - Where a bug cannot be proved to be a hidden backdoor
+* **Auditors** are people who analyze contracts and write reports about what they find
 
 </script></section>
 
@@ -421,11 +443,12 @@ require(balance[msg.sender] >= amount, "not enough balance");
 ## Contract interactions
 
 * Contracts can call each other
-  * Used for many reasons, including contract upgrades
-    * Upgrades are good because bugs can be fixed, but bad because owner could add a backdoor
 * Even when you send ETH, you are calling a function
   * Can choose how much gas to forward
 * Contracts know how to call each-other using *interfaces*
+* Sometimes contracts support upgrades
+  * Implemented with a "proxy contract"
+  * Upgrades are good because bugs can be fixed, but bad because owner could add a backdoor
 
 </script></section>
 
@@ -458,7 +481,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 ## On-chain randomness
 
-* Not easy because blockchain is deterministic, and influencable by users and miners
+* Not easy because blockchain is deterministic, and can be influenced by users and miners
 * Best solution is "commit-reveal"
   * Users commit to hashes of secrets in first phase
   * Then reveal the secrets in second phase
@@ -474,8 +497,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 * When a contract calls itself
   * Usually by calling an attacker contract which calls back into the contract
 * The root problem is global variables
-  * If contract has storage in an inconsistent state and makes a call
-  * Dangerous if contract hasn't **preserved invariants**
+  * Dangerous if contract has storage in an inconsistent state and makes a call
 * "The DAO" was famously hacked for millions using re-entrancy
 
 </script></section>
@@ -491,8 +513,8 @@ require(balance[msg.sender] >= amount, "not enough balance");
 * Re-entrancy guard
   * Effective, but expensive
 * Preserve invariants
-  * Best practice
-  * Checks-Effects-Interactions pattern helps with this
+  * Checks-Effects-Interactions pattern helps ensure this
+  * This is best practice in general, not just in smart contracts
 
 </script></section>
 
@@ -504,9 +526,9 @@ require(balance[msg.sender] >= amount, "not enough balance");
 ## Input handling
 
 * Cross-site scripting (XSS)
-  * An attacker's value is inserted into an HTML page, and malicious javascript code is run
+  * An attacker's string is inserted into an HTML page, causing malicious javascript code to be run
 * SQL injection
-  * An attacker's value is inserted into a SQL statement, and malicious SQL code is run
+  * An attacker's string is inserted into a SQL statement, causing malicious SQL code to be run
 * Buffer over/under-flow
   * A value that is too long or too short causes corruption in surrounding data
 
@@ -520,7 +542,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 * **Trust nothing** that comes from users: They may be attackers
 * **Sanitize input**: Remove characters you aren't expecting, or throw an error
-* **Escape output**: When you insert a user-provided value into a document or program, make sure it can't be interpreted as commands
+* **Escape output**: When you insert a user-provided value into a document or program, make sure it cannot be interpreted as commands
 
 </script></section>
 
@@ -531,9 +553,9 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 ## Front-running
 
-* Because transactions that haven't been mined yet exist in nodes "mempools", everyone can see them
+* Because transactions that haven't been mined yet exist in node "mem-pools", everyone can see them
 * If there is valuable information in those transactions, attackers can create their own transactions based on it
-* By setting high gas price, they can ensure their transaction is mined before yours
+* By setting high gas price, they can ensure their transactions are mined before yours
 * Possible solution: commit-reveal scheme
 
 </script></section>
@@ -546,7 +568,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 * Because adding transactions to the blockchain is expensive, best to do things off-chain if possible
 * Off-chain orderbooks are lists of offers to trade that are published off-chain
-* Orders need to be signed to verify the creator, just like transactions
+  * Orders need to be signed to verify the creator, just like transactions
 
 </script></section>
 
@@ -558,7 +580,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 * In solidity, signatures can be verified with `ecrecover`
 * This takes a hash of the message and the signature, and "recovers" the address that signed the message
-* `"\x19Ethereum Signed Message"` prefix is added by wallets so users can't accidentally sign transactions
+* `"\x19Ethereum Signed Message..."` prefix is added by wallets so users can't be tricked into signing ethereum transactions
 
 </script></section>
 
