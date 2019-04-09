@@ -106,7 +106,7 @@
 ## Randomness
 
 * Without randomness, cryptography is impossible
-  * We need unpredictability for secret keys, etc
+  * We need unpredictability for secret keys, and more
 
 </script></section>
 
@@ -118,7 +118,7 @@
 * True Random Number Generators (RNGs) use things like thermal noise
 * Psuedo-RNGs (PRNGs)
   * Start with a seed and return a deterministic stream of values
-* Cryptographically Secure-PRNGs
+* Cryptographically-Secure-PRNGs
   * Can't predict future or past values without knowing the seed
 
 </script></section>
@@ -144,6 +144,11 @@
 
 * Cryptography needs (very) big numbers
 * We make the numbers so big it would take forever to try them all
+  * 2<sup>92</sup> atoms in the average human body
+  * 2<sup>170</sup> atoms in the planet
+  * 2<sup>190</sup> atoms in the sun
+  * 2<sup>233</sup> atoms in the galaxy
+  * 2<sup>256</sup> number of bitcoin private keys (approx)
 
 </script></section>
 
@@ -176,7 +181,7 @@
 
 ## Kerckhoffs's principle
 
-* Assume that the attacked knows everything about your system except the secret key
+* Assume that the attacker knows everything about your system except the secret key
 * "Security through obscurity" doesn't work
 
 </script></section>
@@ -192,7 +197,7 @@
    * Public key, computed from private key (64 bytes)
    * Ethereum address, computed from public key (20 bytes)
 * The private key lets you prove you created a message
-  * Public key lets anyone verify that
+  * Knowing your public key lets anyone verify that you created the message
 
 </script></section>
 
@@ -217,7 +222,7 @@
 * Updates to the DB are called transactions
   * Need to prevent replay attacks (where same transaction used multiple times)
   * Bitcoin uses Unspent Transaction Output (UTXO) model
-  * Ethereum uses Accounts and nonces (sequence IDs) model
+  * Ethereum uses Account and nonce model (really a sequence IDs)
     * <span class="highlightGreen">N</span><span class="highlight">once</span> is a <span class="highlightGreen">N</span>umber only used <span class="highlight">once</span>
 
 </script></section>
@@ -248,6 +253,7 @@
 * You set a gas price when you create a transaction
 * Your transaction uses a certain amount of gas when it runs
 * You are charged gas used times gas price
+* If you run out of gas, your whole transaction is rolled back
 
 </script></section>
 
