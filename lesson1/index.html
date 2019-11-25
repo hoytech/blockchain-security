@@ -61,7 +61,7 @@
 
 ### Lesson 1: Cryptographic Primitives
 
-*Doug Hoyte, March 2019*
+*Doug Hoyte*
 
 [https://is.gd/blockchainsec](https://is.gd/blockchainsec)
 
@@ -142,6 +142,8 @@
 Linear Congruential Generator (LCG)
 
 <img src="chainsaw.gif" />
+
+* Stars are drawn in "random" spots
 
 </script></section>
 
@@ -392,7 +394,7 @@ $h = H(m)$
 
 Digital signatures let you create messages such as
 
-<i>"I, Alice, send 10 BTC to Bob"</i>
+<i>"I, Alice, send 10 bitcoins to Bob"</i>
 
 ... and prove that this message was created by Alice, and not some attacker
 
@@ -427,9 +429,9 @@ Let's say all you have is a preimage-attack resistant hash function.
 Suppose you want to sign a 1 bit message:
 
   * Private key: 2 random secrets $r_0$, $r_1$
-  * Public key: $H(r_0), H(r_1)$
-  * To sign the message `0`, reveal $r_0$
-  * To sign the message `1`, reveal $r_1$
+  * Public key: $[H(r_0), H(r_1)]$
+  * To sign the message `"0"`, reveal $r_0$
+  * To sign the message `"1"`, reveal $r_1$
 
 Problem: Key-pair only useful one time
 
