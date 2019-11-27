@@ -158,7 +158,7 @@
   * *I, Alice, send 10 coins to Bob*
 * Bob waits a while and then copies the **exact same transaction** and sends it again:
   * *I, Alice, send 10 coins to Bob*
-* Without transaction "replay prevention" Bob would now have 20 coins
+* Without "replay prevention" Bob would now have 20 coins
 
 </script></section>
 
@@ -173,7 +173,7 @@
 * UTXO model: a transaction spends one or more UTXOs, invalidating them so they cannot be spent again
 * Account model: each account has a counter, and each transaction has a sequence number
   * To apply a transaction, its sequence number must be the next account counter number
-  * After applying the transaction, the account counter is incremented
+  * After applying the transaction, the account counter is increased by 1
 
 </script></section>
 
@@ -287,7 +287,7 @@
 
 | Term        | Intuition  |
 | ------------- | -----|
-| gas&nbsp;limit | How many units of gas you buy before driving to the store. If there isn't enough you won't make it there (but you're refunded what you don't use) |
+| gas&nbsp;limit | How many units of gas you buy before driving to the store. If there isn't enough you won't make it there (but if you do, you're refunded what you don't use) |
 | gas&nbsp;price | How much each unit of gas cost at the time you purchased it |
 | gas&nbsp;used | How many units of gas your car needed to drive to the store |
 
@@ -357,7 +357,7 @@
 
 * Miners are the entities that actually make the blocks
 * They can't modify the contents of transactions (since they are signed)
-* But, they choose which transactions to include, and the order of those transactions inside the block
+* But, they choose which transactions to include, and the order of those transactions inside each block that they make
 
 </script></section>
 
@@ -380,7 +380,7 @@
 
 <section data-markdown><script type="text/template">
 
-## What do full nodes do
+## What do full nodes do?
 
 * Full nodes communicate over a gossip protocol
 * Exchange new pending transactions, and new blocks as they are mined
@@ -399,7 +399,7 @@
 
 ## JSON-RPC
 
-* In order to expose functionality, most node software offers *Remote Procedural Call* interfaces
+* In order to expose functionality, most node software offers a *Remote Procedural Call* interface
 * Most common is JSON-RPC, which is just JSON messages sent over HTTP
   * Default Ethereum JSON-RPC port is 8545
 * [Documentation](https://github.com/ethresearch/en-ethereum-wiki/blob/master/json-rpc.md)
@@ -434,7 +434,7 @@ Then run:
 
     $ ganache-cli -d
 
-(The `-d` makes it so the accounts are the same every time)
+* The `-d` makes it so the accounts are the same every time ("deterministic")
 
 </script></section>
 
@@ -576,7 +576,7 @@ Then run:
 ## Metamask
 
 * Popular wallet implemented as a browser extension
-  * Websites cannot access the private keys
+  * Websites cannot access private keys
 * Creates transactions
 * Download it from [https://metamask.io](https://metamask.io) 
   * Backup your seed words safely!
@@ -605,7 +605,7 @@ After ganache-cli is started, change metamask to point to it (instead of the mai
 ## Accounts in metamask
 
 * You may notice that your accounts are the same after you change networks in metamask
-* This is normal: An account is just a private key and an address. It can be used on any network
+* This is normal: An account is just a private key and its corresponding address. It can be used on any network
 * You may have a balance on one network and a different balance on another
 
 </script></section>
