@@ -132,7 +132,7 @@
 * A contract's address is the hash of the creator's address and the nonce of the transaction that created it (RLP encoded)
   * So, contracts do not have private keys
 * Contracts *do* have nonces
-  * Incremented whenever they deploy children contracts
+  * Incremented whenever they deploy children contracts (so children contracts have unique addresses)
 
 </script></section>
 
@@ -191,10 +191,10 @@ contract SimpleAdder {
 }
 ```
 
-* Functions are similar to other languages:
+* Functions are as in other languages:
   * Accept parameters
   * Perform computations and actions
-  * Optionally can return a result
+  * Optionally can return results
 
 </script></section>
 
@@ -254,8 +254,8 @@ contract SimpleAdder {
 * Contracts have a persistent memory called storage (or sometimes state)
 * This will preserve values between transactions
   * *pure*: Doesn't read or write to storage
-  * *view*: Only reads from storage
-  * None: Writes to storage
+  * *view*: Reads from storage, but does not write
+  * None: Reads and writes to storage
 
 </script></section>
 
@@ -681,9 +681,9 @@ contract MyContract {
 
 <section data-markdown><script type="text/template">
 
-## Lab 3
+## Exercise: Coin Flip Game
 
-[tipjar.html](tipjar.html)
+[coinflipgame.html](coinflipgame.html)
 
 </script></section>
 
@@ -712,9 +712,9 @@ contract MyContract {
     }
 </pre>
 
-* Like a "dictionary" or "hash-table" or in other languages
+* Like a "dictionary" or "hash-table" in other languages
 * Values are `0` by default
-* A look-up table. In this case:
+* In this example:
   * Look-up an `address`, get a `uint256`
   * Do we need to worry about overflow here?
 
@@ -773,7 +773,7 @@ contract MyContract {
 * Mappings use less gas
   * Arrays have to update `length`
 * You can easily delete a mapping
-  * Arrays need special code to swap an item with the last entry
+  * Arrays need special code to swap an item with the last entry, then decrement length
 * Main use of arrays is so you can loop over them:
   * If possible, avoid using loops, especially if you don't know how many iterations needed
 
@@ -851,9 +851,9 @@ event LogDeposit(address indexed account, uint256 amount);
 
 <section data-markdown><script type="text/template">
 
-## Lab 4
+## Lab 3
 
-[coinflipgame.html](coinflipgame.html)
+[tipjar.html](tipjar.html)
 
 </script></section>
 
