@@ -647,7 +647,7 @@ contract MyContract {
 
 <pre class="hljs js">
     function withdrawAll() public {
-        totalAmount = <span class="highlight">address(this).balance</span>;
+        uint256 totalAmount = <span class="highlight">address(this).balance</span>;
         <span class="highlight">msg.sender.transfer</span>(totalAmount);
     }
 </pre>
