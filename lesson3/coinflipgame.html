@@ -6,7 +6,7 @@ li { margin-top: 20px; }
 
 <h1>Exercise: Coin Flip Game</h1>
 
-<div>Try to modify the <code>generateRandomBit()</code> function in the <code>CoinFlipGame</code> contract below to generate a random coin flip.</div>
+<div>Deploy the <code>CoinFlipGame</code> contract below. Make sure to send an initial value of ETH in when you deploy it. Try to make a few bets and see if you win or lose.</div>
 
 <pre>
 pragma solidity ^0.5.0;
@@ -15,11 +15,17 @@ contract CoinFlipGame {
     constructor() public payable {
     }
     
+    event LogWin(uint256 amount);
+    event LogLose(uint256 amount);
+    
     function bet() public payable {
         require(msg.value <= maxBet(), "bet size too big");
         
         if (generateRandomBit()) {
+            emit LogWin(msg.value);
             msg.sender.transfer(msg.value * 2);
+        } else {
+            emit LogLose(msg.value);
         }
     }
     
@@ -28,7 +34,17 @@ contract CoinFlipGame {
     }
     
     function generateRandomBit() private view returns(bool) {
-        // MODIFY ME to randomly return either true or false
+        bytes32 hash = keccak256(
+                        abi.encodePacked(
+                            msg.sender,
+                            msg.value,
+                            block.number,
+                            block.timestamp,
+                            gasleft()
+                        )
+                    );
+                    
+        return uint256(hash) % 2 == 0;
     }
 }
 </pre>
@@ -36,7 +52,7 @@ contract CoinFlipGame {
 <ul>
 
 <li>
-You can use any of the solidity <a href="https://solidity.readthedocs.io/en/v0.5.3/units-and-global-variables.html#special-variables-and-functions">special variables</a>, hash functions like <code>keccak256()</code>, and/or any other method you like.
+The <code>generateRandomBit()</code> function uses several of the solidity <a href="https://solidity.readthedocs.io/en/v0.5.3/units-and-global-variables.html#special-variables-and-functions">special variables</a>, and combines them with the hash function <code>keccak256()</code>.
 </li>
 
 <li>
@@ -44,7 +60,7 @@ Note: The remix IDE doesn't implement <code>blockhash()</code> properly. If you 
 </li>
 
 <li>
-Try to make the random bit as difficult as possible to predict, since you don't want anybody to have an unfair advantage. In a later lab we'll see if anybody can cheat and predict your random bits.
+Is this a 100% fair betting game, or is it possible to cheat this contract?
 </li>
 
 </ul>
