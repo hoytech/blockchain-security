@@ -344,6 +344,7 @@ interface VaultInterface {
     VaultInterface v = VaultInterface(vaultAddr);
     uint256 myBalance = v.balance();
     v.deposit.value(1 ether)();
+    v.deposit.gas(2300).value(1 ether)();
     v.withdraw(1 ether);
 </pre>
 
