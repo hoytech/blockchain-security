@@ -296,7 +296,7 @@ db.get('SELECT * FROM users WHERE userId = ?', req.params.userId);
     * Everyone can see them
 * If the transactions contain valuable information, they can be used to create new transactions
   * Can ensure they are mined before the original transactions by setting high gas price
-    * Miners choose highest gas price transactions when making blocks
+    * Miners usually choose highest gas price transactions when making blocks
 
 </script></section>
 
@@ -404,6 +404,21 @@ ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s)
 
 
 
+
+
+<section data-markdown><script type="text/template">
+
+## Signature UI: Old
+
+<img src="sig1.png" width="20%" />
+
+* Users just saw a hash
+* Didn't really know what they were signing
+
+</script></section>
+
+
+
 <section data-markdown><script type="text/template">
 
 ## \x19... prefix
@@ -422,6 +437,22 @@ bytes32 messageHash2 = keccak256(abi.encodePacked(
 
 
 
+
+
+<section data-markdown><script type="text/template">
+
+## New Signature UI: <a href="https://medium.com/metamask/eip712-is-coming-what-to-expect-and-how-to-use-it-bb92fd1a7a26">EIP712</a>
+
+<img src="sig2.png" width="30%" />
+
+* More clear what they are signing
+
+</script></section>
+
+
+
+
+
 <section data-markdown><script type="text/template">
 
 ## Signature malleability
@@ -437,6 +468,16 @@ v' = 0x37 - v
   * But `ecrecover` doesn't so don't use signatures to prevent replay attacks
 
 </script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Exam details
+
+</script></section>
+
 
 
 
