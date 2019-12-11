@@ -321,7 +321,7 @@
 * Programming language used to create smart contracts
 * Compiles to "bin" (binary data) and "abi" (application binary interface)
   * "bin" is deployed on blockchain
-  * "abi" is used by your dApp to know how to talk to the contract
+  * "abi" is used by dApps to know how to talk to the contract
 
 </script></section>
 
@@ -410,6 +410,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
   * Functions that receive value must be marked `payable`
   * All transactions to contracts run code
     * If function not found, or no function name given, runs the fallback function
+    * Fallback function usually used to accept (or decline) simple ETH transfers, also to log the transfer
 
 </script></section>
 
@@ -421,6 +422,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 * `mapping` creates a key-value lookup table
 * Arrays are sequentially indexed
   * Try to use mappings instead of arrays if possible
+  * Looping over an array can use too much gas
 * `struct`s group together other types into a new, composite type
 
 </script></section>
@@ -471,7 +473,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 * Contracts that call `selfdestruct` in constructor
   * Useful for performing multiple operations atomically
   * Or for condition checking before/after an operation
-    * Also useful for attacks, like predicting "random" numbers
+    * Also useful for attacks, like rolling back an operation that caused you to lose money
 
 </script></section>
 
@@ -495,10 +497,10 @@ require(balance[msg.sender] >= amount, "not enough balance");
 ## Re-entrancy
 
 * When a contract calls itself
-  * Usually by calling an attacker contract which calls back into the contract
+  * Usually by calling an attacker contract which calls back into the original contract
 * The root problem is global variables
-  * Dangerous if contract has storage in an inconsistent state and makes a call
-* "The DAO" was famously hacked for millions using re-entrancy
+  * Dangerous if contract has storage in an inconsistent state at the time of the call
+* "The DAO" was famously hacked for millions using a re-entrancy bug
 
 </script></section>
 
@@ -511,7 +513,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 * Limit amount of gas forwarded
   * `transfer` and `send` limit to 2,300 gas
 * Re-entrancy guard
-  * Effective, but expensive
+  * Effective, but expensive (less so nowadays)
 * Preserve invariants
   * Checks-Effects-Interactions pattern helps ensure this
   * This is best practice in general, not just in smart contracts
@@ -564,10 +566,18 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 <section data-markdown><script type="text/template">
 
+<img src="../lesson5/frontrunning.png" />
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
 ## Off-chain designs
 
 * Because adding transactions to the blockchain is expensive, best to do things off-chain if possible
-* Off-chain orderbooks are lists of offers to trade that are published off-chain
+* Off-chain orderbooks are lists of offers to trade, which are published off-chain (perhaps to a website)
   * Orders need to be signed to verify the creator, just like transactions
 
 </script></section>
@@ -581,6 +591,7 @@ require(balance[msg.sender] >= amount, "not enough balance");
 * In solidity, signatures can be verified with `ecrecover`
 * This takes a hash of the message and the signature, and "recovers" the address that signed the message
 * `"\x19Ethereum Signed Message..."` prefix is added by wallets so users can't be tricked into signing ethereum transactions
+  * Nowadays better solution: EIP712
 
 </script></section>
 
@@ -599,11 +610,16 @@ require(balance[msg.sender] >= amount, "not enough balance");
 
 
 
+
 <section data-markdown><script type="text/template">
 
 ## End of review
 
-* Questions?
+Questions?
+
+Feel free to email me:
+
+  <b>doug@hoytech.com</b>
 
 </script></section>
 
