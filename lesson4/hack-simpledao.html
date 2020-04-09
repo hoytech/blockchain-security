@@ -40,6 +40,8 @@ interface SimpleDAOInterface {
 
 contract HackSimpleDAO {
     address simpleDAOAddr;
+
+    constructor() public payable {}
     
     function hack(address addr) public payable {
         simpleDAOAddr = addr;
