@@ -14,7 +14,7 @@ ul > li {
 </div>
 
 <ul>
-  <li>Although not required, I suggest you use node.js (JavaScript) and the <a href="https://docs.ethers.io/ethers.js/html/">ethers.js</a> library. You can install ethers like so:
+  <li>Although not required, I suggest you use node.js (JavaScript) and the <a href="https://docs.ethers.io/v5/">ethers.js</a> library. You can install ethers like so:
 <div>
 <pre>
 $ npm install ethers
@@ -22,8 +22,8 @@ $ npm install ethers
 </div>
   </li>
 
-  <li>You will need to create a new <a href="https://docs.ethers.io/ethers.js/html/api-providers.html">JsonRpcProvider</a> with the URL of <code>http://localhost:8545</code></li>
-  <li>Then create a new <a href="https://docs.ethers.io/ethers.js/html/api-wallet.html">Wallet</a>, passing in a private key and the JsonRpcProvider instance</li>
+  <li>You will need to create a new <a href="https://docs.ethers.io/v5/api/providers/jsonrpc-provider/">JsonRpcProvider</a> with the URL of <code>http://localhost:8545</code></li>
+  <li>Then create a new <a href="https://docs.ethers.io/v5/api/signer/#Wallet">Wallet</a>, passing in a private key and the JsonRpcProvider instance</li>
   <li>Then call the <code>sendTransaction</code> method on the wallet</li>
   <li><b>NOTE</b>: Only submit the script that you wrote. Do not submit zip files or node_modules or anything else, otherwise you will receive 0 (but you can re-submit)</li>
 </ul>
