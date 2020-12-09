@@ -1,0 +1,43 @@
+<style>
+body { font-size: 24px; }
+div { margin-top: 20px; }
+li { margin-top: 20px; }
+</style>
+
+<h1>Lab 4: Hack TimeLock</h1>
+
+<div>Write a single-use solidity contract to steal funds from the following <code>TimeLock</code> contract. Your submission should be the solidity program.</div>
+
+<pre>
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.6.12;
+
+contract TimeLock {
+    uint256 public unlockTime;
+    
+    constructor() public payable {
+        unlockTime = block.timestamp + (365 * 86400); // 1 year
+    }
+    
+    function increaseUnlockTime(uint256 numSeconds) public {
+        unlockTime += numSeconds;
+    }
+    
+    function claim() public payable {
+        require(msg.value == 1 ether, "please send along 1 ETH to claim");
+        if (block.timestamp &gt;= unlockTime) {
+            msg.sender.transfer(address(this).balance);
+        }
+    }
+}
+</pre>
+
+<ul>
+
+<li>TimeLock is a contract that locks up a certain amount of ETH (which was added when it was created). This ETH can only be redeemed after a period of time has elapsed.</li>
+
+<li>Look closely at TimeLock to see if you can find any vulnerabilities. Is it necessary to wait a whole year before claiming?</li>
+
+<li>Note that to attempt a claim you need to send along 1 ETH. This is dangerous: What if somebody calls increaseUnlockTime before your transaction is mined? You will lose 1 ETH! Is there any way to protect against this?</li>
+
+</ul>
