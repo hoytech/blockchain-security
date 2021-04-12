@@ -310,6 +310,7 @@ function addOne(uint256 a) public pure returns(uint256) {
 
 
 
+
 <section data-markdown><script type="text/template">
 
 ## require
@@ -400,6 +401,22 @@ function addOne(uint256 a) public pure returns(uint256) {
         return c;
     }
 </pre>
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+## Overflows in 0.8
+
+* Solidity 0.8 now adds checks that will throw an error if overflow occurs
+* Useful, but be aware now that contracts can get locked up if stored numbers too big
+* Overflow checks can be disabled:
+      unchecked {
+          a++; // wrap on overflow
+      }
 
 </script></section>
 
