@@ -144,12 +144,12 @@
 ## What about this?
 
 <pre class="hljs js">
-    uint256 ownerReward = 1 ether;
+    int256 ownerReward = 1 ether;
 
-    function claimOwnerReward(uint256 amount) public onlyOwner {
+    function claimOwnerReward(int256 amount) public onlyOwner {
         require(amount <= ownerReward, "too much");
         ownerReward =- amount;
-        owner.transfer(amount);
+        owner.transfer(uint(amount));
     }
 </pre>
 
@@ -162,12 +162,12 @@
 ## Plausible deniability
 
 <pre class="hljs js">
-    uint256 ownerReward = 1 ether;
+    int256 ownerReward = 1 ether;
 
-    function claimOwnerReward(uint256 amount) public onlyOwner {
+    function claimOwnerReward(int256 amount) public onlyOwner {
         require(amount <= ownerReward, "too much");
         ownerReward <span class="highlightRed">=-</span> amount;
-        owner.transfer(amount);
+        owner.transfer(uint(amount));
     }
 </pre>
 
@@ -257,6 +257,7 @@
 * `transfer` forwards 2,300 gas
   * Small amount: Just enough for the fallback function to log an event
   * Not enough to do things like write to storage
+  * Useful, but [what if Ethereum hardforks cause gas costs to change?](https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/)
 
 </script></section>
 
@@ -273,7 +274,7 @@
 * `address.send(amount)`
   * <span class="highlightRed">Returns false on failure</span>
   * Forwards 2,300 gas
-* `address.call.value(amount)("")`
+* `address.call{ value: 1 }("");`
   * <span class="highlightRed">Returns false on failure</span>
   * <span class="highlightRed">Forwards all available gas</span>
 
@@ -468,7 +469,7 @@ contract ConditionalTipper {
 ## Beating the house
 
 * Many dApps that depend on randomness have [been found vulnerable](https://blog.positive.com/predicting-random-numbers-in-ethereum-smart-contracts-e5358c6b8620)
-* How about the Coin Flip Game contracts we implemented in the previous lab?
+* How about the Coin Flip Game contracts from last lesson's exercise?
   * Consider what is possible with a single-use contract
     * Note that conditions can be checked after calling a contract, and can optionally revert the entire transaction
 
@@ -806,7 +807,8 @@ Hacker fallback:         <span class="highlightRed">dao.withdraw(10)</span>
 * If all you want to do is send ETH, use `transfer` since it limits the amount of gas available to the fallback
   * 2,300 gas is just enough to log, but not enough to do bad things like write to storage
 * You can also manually limit the gas forwarded:
-      someContract.someFunc.gas(10000)();
+      someContract.someFunc{ gas: 10000 }();
+* But as discussed previously, it's hard to know in advance how much gas is needed
 
 </script></section>
 
@@ -828,8 +830,7 @@ Hacker fallback:         <span class="highlightRed">dao.withdraw(10)</span>
     }
 </pre>
 
-* Good solution, but adds 5,000 gas to each call
-  * Will be almost free if [EIP-1283](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1283.md) deployed
+* Good solution, but adds small amount of gas to each call because the `locked` storage slot needs to be accessed and modified
 
 </script></section>
 

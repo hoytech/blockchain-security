@@ -14,16 +14,15 @@ li { margin-top: 20px; }
 <li>In the <a href="https://remix.ethereum.org">remix IDE</a>, deploy the TipJar contract you created in <a href="../lesson3/tipjar.html">a previous lab</a>. Then use the following single-use contract to make sure that your tip doesn't bring the tipjar's balance over some specified amount.
 
 <pre>
-pragma solidity ^0.5.0;
+pragma solidity ^0.8.0;
 
 contract ConditionalTipper {
-    constructor(address payable tipjar, uint256 limit)
-                  public payable {
-        if (tipjar.balance < limit) {
+    constructor(address payable tipjar, uint256 limit) payable {
+        if (tipjar.balance &lt; limit) {
             tipjar.transfer(limit - tipjar.balance);
         }
 
-        selfdestruct(msg.sender);
+        selfdestruct(payable(msg.sender));
     }
 }
 </pre>

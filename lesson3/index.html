@@ -163,7 +163,7 @@
 ## Structure
 
 ```
-    pragma solidity ^0.5.0;
+    pragma solidity ^0.8.0;
 
     contract MyContractName {
         // code goes here
@@ -172,7 +172,7 @@
 
 * `pragma` line: What version of solidity you want
   * We'll leave this out of examples, but you should always have it in your code
-  * Use at least `0.5.0`: This course does not cover security issues of earlier versions
+  * Use at least `0.8.0`: This course does not cover security issues of earlier versions
 * `contract`: Everything inside the curly braces is your contract
 
 </script></section>
@@ -284,13 +284,6 @@ contract SimpleAdder {
 
 <section data-markdown><script type="text/template">
 
-<img src="rollover.jpg" />
-
-</script></section>
-
-
-<section data-markdown><script type="text/template">
-
 ## Overflows
 
 ```
@@ -299,11 +292,40 @@ function addOne(uint256 a) public pure returns(uint256) {
 }
 ```
 
-* `addOne(x)` should always be bigger than `x` right?
+* `addOne()` should always succeed right?
   * **No**. The output needs to fit into a `uint256`
   * Adding `1` to the biggest `uint256` value (2<sup>256</sup>-1)
     * Can't fit in a **uint256**
-    * So it will wrap (overflow) back to 0
+    * So the function call will revert (fail)
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+
+## Unchecked math
+
+```
+function addOne(uint256 a) public pure returns(uint256) {
+    unchecked {
+        return a + 1;
+    }
+}
+```
+
+* Solidity versions before 0.8 would not fail, and would silently wrap back around to 0
+* Still possible to do this, with `unchecked` blocks
+  * Saves gas but be careful!
+
+</script></section>
+
+
+
+
+<section data-markdown><script type="text/template">
+
+<img src="rollover.jpg" />
 
 </script></section>
 
@@ -317,7 +339,7 @@ function addOne(uint256 a) public pure returns(uint256) {
 
 ```
 function addOne(uint256 a) public pure returns(uint256) {
-    require(a + 1 > a, "sorry, a is too big");
+    require(a < type(uint256).max, "sorry, a is too big");
     return a + 1;
 }
 ```
@@ -336,7 +358,7 @@ function addOne(uint256 a) public pure returns(uint256) {
 
 ```
 function addOne(uint256 a) public pure returns(uint256) {
-    require(a + 1 > a, "sorry, a is too big");
+    require(a < type(uint256).max, "sorry, a is too big");
     uint256 output = a + 1;
     assert(output != 0); // 0 should be impossible
     return output;
@@ -365,6 +387,7 @@ function addOne(uint256 a) public pure returns(uint256) {
 </pre>
 
 * If `amount` is greater than `balance`, the subtraction underflows
+  * Reverts in Solidity 0.8+, silently wraps before
 * In fact, this require is pointless:
   * *All* `uint256` values are `>= 0` (that's what unsigned means)
 
@@ -379,9 +402,8 @@ function addOne(uint256 a) public pure returns(uint256) {
 
 * In general, if values can be controlled by an attacker, make sure you are careful when performing artithmetic on them
   * Multiplication can also overflow
-  * `x` is not necessarily positive after this:
     <pre>if (x < 0) x *= -1;</pre>
-    * When `x` is most negative integer
+    * When `x` is most negative signed integer
 </script></section>
 
 
@@ -402,23 +424,10 @@ function addOne(uint256 a) public pure returns(uint256) {
     }
 </pre>
 
-</script></section>
-
-
-
-
-<section data-markdown><script type="text/template">
-
-## Overflows in 0.8
-
-* Solidity 0.8 now adds checks that will throw an error if overflow occurs
-* Useful, but be aware now that contracts can get locked up if stored numbers too big
-* Overflow checks can be disabled:
-      unchecked {
-          a++; // wrap on overflow
-      }
+* Typically not necessary if using Solidity 0.8+
 
 </script></section>
+
 
 
 
@@ -489,13 +498,13 @@ contract SimpleCounter {
     function add(uint256 a) public {
         uint256 oldCounter = counter;
         counter += a;
-        require(counter > oldCounter, "overflow!");
+        require(a < 100, "a too big");
     }
 }
 ```
 
-* Notice we are checking for overflow *after* we have modified storage
-* When `require` or `assert` trigger a failure, all storage changes are "rolled back" (put back to how they were before)
+* Notice we are checking for a limit on `a` *after* we have modified storage
+* This is OK because on revert all storage changes are "rolled back" (put back to how they were before)
 
 </script></section>
 
@@ -639,22 +648,33 @@ contract MyContract {
 ## fallback function
 
 <pre class="hljs js">
-    function () external payable {
-        // thanks for the funds
-    }
-</pre>
-
-<pre class="hljs js">
-    function () external payable {
-        require(false, "please don't just send me ETH");
+    fallback() external {
+        // ... do something
     }
 </pre>
 
 * If somebody calls an unknown function, or no function at all, the *fallback function* is called
 * It's just a regular function, but has no name
+* Useful for implementing special calling protocols such as proxies
+
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+
+## receive function
+
+<pre class="hljs js">
+    receive() external payable {
+        require(false, "please don't send me ETH");
+    }
+</pre>
+
+* A variant of the fallback function
 * Often used to accept (or decline) direct ETH transfers to a contract
 
 </script></section>
+
 
 
 
@@ -777,7 +797,6 @@ contract MyContract {
   * How do you ensure that the same user doesn't get added *twice* to the `users` array?
   * If the `users` array gets too big, we may not be able to loop over it without running out of gas
     * **block gas limit**: an upper limit on how much gas a transaction can possibly consume
-* Array length can underflow, [disabling bounds checks](https://github.com/Arachnid/uscc/tree/master/submissions-2017/doughoyte)
 
 </script></section>
 
