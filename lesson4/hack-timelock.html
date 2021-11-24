@@ -9,13 +9,12 @@ li { margin-top: 20px; }
 <div>Write a single-use solidity contract to steal funds from the following <code>TimeLock</code> contract. Your submission should be the solidity program.</div>
 
 <pre>
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.0;
 
 contract TimeLock {
     uint256 public unlockTime;
     
-    constructor() public payable {
+    constructor() payable {
         unlockTime = block.timestamp + (365 * 86400); // 1 year
     }
     
@@ -26,7 +25,7 @@ contract TimeLock {
     function claim() public payable {
         require(msg.value == 1 ether, "please send along 1 ETH to claim");
         if (block.timestamp &gt;= unlockTime) {
-            msg.sender.transfer(address(this).balance);
+            payable(msg.sender).transfer(address(this).balance);
         }
     }
 }
